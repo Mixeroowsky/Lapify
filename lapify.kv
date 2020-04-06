@@ -12,7 +12,7 @@
 <StackLayout>:
 	orientation: 'lr-tb'	
 	ImageButton:
-		text: "Strona g³ówna"
+		text: "Strona gÂ³Ã³wna"
 	ImageButton:
 		text: "Nowa sesja"
 	ImageButton:
@@ -31,7 +31,10 @@
 	canvas:
 		Color:
 			rgba: (1,1,1,1)
-			
+		Rectangle:			
+			source: 'graphics/titlebar.png'	
+			pos: 0, self.height-40
+			size: self.width, 40
 	
 	StackLayout:
 		pos: self.parent.pos
