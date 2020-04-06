@@ -1,0 +1,42 @@
+#:kivy 1.11.1
+#:import hex kivy.utils.get_color_from_hex
+<ImageButton@Button>:
+	background_normal: 'graphics/titlebar.png'
+	background_down: 'graphics/pressed.png'
+	size_hint: (None,None)
+	size: 120,40
+	color: 0,0,0,1
+	font_name: 'graphics/Roboto-Light'
+	font_size: '14'
+
+<StackLayout>:
+	orientation: 'lr-tb'	
+	ImageButton:
+		text: "Strona g³ówna"
+	ImageButton:
+		text: "Nowa sesja"
+	ImageButton:
+		text: "Live"
+	ImageButton:
+		text: "Poprzednie sesje"		
+	ImageButton:
+		text: "Pomoc"
+<TitleBar>:	
+	canvas.before:
+		Color: 
+			rgba: hex('#6F696D')
+		Rectangle:			
+			pos: self.pos
+			size: self.size	
+	canvas:
+		Color:
+			rgba: (1,1,1,1)
+			
+	
+	StackLayout:
+		pos: self.parent.pos
+		size: self.parent.size
+
+
+
+	
