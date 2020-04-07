@@ -1,0 +1,236 @@
+#:import utils kivy.utils
+#:import Factory kivy.factory.Factory
+
+Manager:
+    NowaSesja:
+    Live:
+    PoprzednieSesje:
+    Pomoc:
+
+<MyPopup@Popup>:
+    title: "Rozpocznij nowa sesje"
+    size_hint: (None, None)
+    size: (400,400)
+    auto_dismiss: False
+    Button:
+        size_hint: 0.4, 0.2
+        pos_hint:{"top":0.3}
+        text: 'OK'
+        on_release:
+            app.root.current = "live"
+            root.dismiss()
+
+<NowaSesja>:
+    name: "nowa"
+
+    FloatLayout:
+
+        cols: 1
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FF8C00')
+            pos_hint:{"left":1,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Nowa Sesja"
+            on_press:
+                background_color: utils.get_color_from_hex('#FF8C00')
+            on_release:
+                app.root.current = "nowa"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.15,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Live"
+            on_press:
+                background_color: utils.get_color_from_hex('#FF8C00')
+            on_release:
+                app.root.current = "live"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.3,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Poprzednie Sesje"
+            on_press:
+                background_color: utils.get_color_from_hex('#FF8C00')
+            on_release:
+                app.root.current = "poprzednie"
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.45,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Pomoc"
+            on_press:
+                background_color: utils.get_color_from_hex('#FF8C00')
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+            Label:
+                text: "NOWA SESJA"
+
+            Button:
+                background_color: utils.get_color_from_hex('#FFFFFF')
+                pos_hint:{"x":0.7,"top":0.5}
+                size_hint: 0.22, 0.1
+                text: "Rozpocznij nowa sesje"
+                on_release:
+                    Factory.MyPopup().open()
+
+
+
+<Live>:
+    name: "live"
+
+    FloatLayout:
+
+        cols: 1
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"left":1,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Nowa Sesja"
+            on_release:
+                app.root.current = "nowa"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FF8C00')
+            pos_hint:{"x":0.15,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.3,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.45,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        Label:
+            text: "LIVE"
+
+
+<PoprzednieSesje>:
+    name: "poprzednie"
+
+    FloatLayout:
+
+        cols: 1
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"left":1,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Nowa Sesja"
+            on_release:
+                app.root.current = "nowa"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.15,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FF8C00')
+            pos_hint:{"x":0.3,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.45,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        Label:
+            text: "POPRZEDNIE SESJE"
+
+<Pomoc>:
+    name: "pomocy"
+
+    FloatLayout:
+
+        cols: 1
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"left":1,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Nowa Sesja"
+            on_release:
+                app.root.current = "nowa"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.15,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FFA500')
+            pos_hint:{"x":0.3,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Poprzednie Sesje"
+            on_press:
+                background_color: utils.get_color_from_hex('#FF8C00')
+            on_release:
+                app.root.current = "poprzednie"
+
+
+        Button:
+            background_normal: ''
+            background_color: utils.get_color_from_hex('#FF8C00')
+            pos_hint:{"x":0.45,"top":1}
+            size_hint: 0.15, 0.04
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        Label:
+            text: "POMOC"
