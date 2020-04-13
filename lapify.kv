@@ -1,5 +1,7 @@
 #:kivy 1.11.1
 #:import hex kivy.utils.get_color_from_hex
+#:import utils kivy.utils
+#:import Factory kivy.factory.Factory
 <ImageButton@Button>:
 	background_normal: 'graphics/titlebar.png'
 	background_down: 'graphics/pressed.png'
@@ -9,8 +11,39 @@
 	font_name: 'graphics/Roboto-Light'
 	font_size: '14'
 
-<StackLayout>:
-	orientation: 'lr-tb'	
+
+<PopLay>:
+	Label:
+        text: "Nowa sesja"
+        size_hint: 0.6, 0.2
+        pos_hint: {"x":0.2, "top":1}
+    BoxLayout:
+        orientation: 'vertical'
+        height: 200
+        size_hint_y: None
+        pos_hint: {'center_x': 0.7, 'center_y': 0.7}
+        Label:
+            text: 'Imie'
+            size_hint_x: .3
+        Label:
+            text: 'Nazwisko'
+            size_hint: .3,.3
+        Button:
+            text: 'ok'
+            size_hint_x: .3
+        TextInput:
+            size_hint: .5,.7
+    Button:
+        text: "OK"
+        size_hint: 0.4, 0.1
+        pos_hint: {"x":0.3, "y":0.1}
+        on_release:
+            app.root.current = "live"
+            root.dismiss()
+
+
+<Stack>:
+	orientation: 'lr-tb'
 	ImageButton:
 		text: "Strona główna"
 	ImageButton:
@@ -18,27 +51,44 @@
 	ImageButton:
 		text: "Live"
 	ImageButton:
-		text: "Poprzednie sesje"		
+		text: "Poprzednie sesje"
 	ImageButton:
 		text: "Pomoc"
-<TitleBar>:	
+	FloatLayout:
+        Button:
+            text: "Rozpocznij nowa sesje"
+            pos_hint:{"x":0.7,"top":0.5}
+            size_hint: None, None
+            size: 300,100
+            on_release: root.btn()
+
+
+<TitleBar>:
 	canvas.before:
-		Color: 
+		Color:
 			rgba: hex('#6F696D')
-		Rectangle:			
+		Rectangle:
 			pos: self.pos
-			size: self.size	
+			size: self.size
 	canvas:
 		Color:
 			rgba: (1,1,1,1)
-		Rectangle:			
-			source: 'graphics/titlebar.png'	
+		Rectangle:
+			source: 'graphics/titlebar.png'
 			pos: 0, self.height-40
 			size: self.width, 40
-	
-	StackLayout:
+	Image:
+		source: 'graphics/lapify.png'
+		pos: root.width-(self.width+100),root.height-110
+		size:70,70
+	Image:
+		source: 'graphics/gllogo.png'
+		pos: root.width-self.width+20,root.height-150
+		size:150,150
+	Stack:
 		pos: self.parent.pos
 		size: self.parent.size
+
 
 
 
