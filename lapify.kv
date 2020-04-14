@@ -13,32 +13,60 @@
 
 
 <PopLay>:
-	Label:
-        text: "Nowa sesja"
-        size_hint: 0.6, 0.2
-        pos_hint: {"x":0.2, "top":1}
     BoxLayout:
         orientation: 'vertical'
-        height: 200
+        size_hint_x: .8
+        pos_hint: {"center_x":.5,'y': .7}
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            Label:
+                text: 'Id kierowcy'
+                size_hint_x: .3
+            Label:
+                text: 'Imie'
+                size_hint_x: .4
+            Label:
+                text: 'Nazwisko'
+                size_hint_x: .4
+            Label:
+                text: ''
+                size_hint_x: .2
+        BoxLayout:
+            id: input
+            size_hint_y: None
+            pos_hint_x: 1
+            height: 30
+            TextInput:
+                id: driver_id
+                multiline: False
+                size_hint_x:.3
+            TextInput:
+                id: name
+                multiline: False
+                size_hint_x:.3
+            TextInput:
+                id: last_name
+                multiline: False
+                size_hint_x:.3
+            Button:
+                id:add
+                text: 'Dodaj'
+                on_release:
+                    root.add_driver()
+                size_hint_x:0.2
+    GridLayout:
+        pos_hint: {'center_x':0.55, 'top': 0.7}
+        size_hint_x: 1
         size_hint_y: None
-        pos_hint: {'center_x': 0.7, 'center_y': 0.7}
-        Label:
-            text: 'Imie'
-            size_hint_x: .3
-        Label:
-            text: 'Nazwisko'
-            size_hint: .3,.3
-        Button:
-            text: 'ok'
-            size_hint_x: .3
-        TextInput:
-            size_hint: .5,.7
+        size:
+        id:list
+        cols: 1
     Button:
         text: "OK"
         size_hint: 0.4, 0.1
         pos_hint: {"x":0.3, "y":0.1}
         on_release:
-            app.root.current = "live"
             root.dismiss()
 
 
@@ -92,4 +120,4 @@
 
 
 
-	
+
