@@ -16,23 +16,79 @@ Manager:
 <DodajKierowce@Popup>:
     title: "Dodaj kierowce"
     size_hint: (None, None)
-    size: (400,400)
+    size_hint: .7,.7
     FloatLayout:
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: .8
+            pos_hint: {"center_x":.5,'y': .9}
+            BoxLayout:
+                size_hint_y: None
+                height: 50
+                Label:
+                    text: 'Id kierowcy'
+                    size_hint_x: .3
+                Label:
+                    text: 'Imie'
+                    size_hint_x: .4
+                Label:
+                    text: 'Nazwisko'
+                    size_hint_x: .4
+                Label:
+                    text: ''
+                    size_hint_x: .2
+            BoxLayout:
+                id: input
+                size_hint_y: None
+                pos_hint_x: 1
+                height: 30
+                TextInput:
+                    id: driver_id
+                    multiline: False
+                    size_hint_x: .3
+                TextInput:
+                    id: name
+                    multiline: False
+                    size_hint_x: .3
+                TextInput:
+                    id: last_name
+                    multiline: False
+                    size_hint_x: .3
+                Button:
+                    id:add
+                    text: 'Dodaj'
+                    on_release: app.driverReference.add_driver()
+                    size_hint_x: .2
+        GridLayout:
+            pos_hint: {'center_x':0.55, 'top': 0.7}
+            size_hint_x: 1
+            size_hint_y: None
+            size:
+            id:list
+            cols: 1
         Button:
             size_hint: 0.6, 0.2
-            pos_hint:{"x":0.2,"y":0.6}
-            text: 'Nowy kierowca'
+            pos_hint:{"x":0.2,"y":0.1}
+            text: 'Ok'
             on_release:
-                app.root.current = "nowykierowca"
-                root.dismiss()
-        Button:
-            size_hint: 0.6, 0.2
-            pos_hint:{"x":0.2,"y":0.3}
-            text: 'Wybierz kierowce'
-            on_release:
-                app.root.current = "wybierzkierowce"
                 root.dismiss()
 
+
+
+#<PopLay>:
+ #   GridLayout:
+ #       pos_hint: {'center_x':0.55, 'top': 0.7}
+ #       size_hint_x: 1
+ #       size_hint_y: None
+  #      size:
+  #      id:list
+  #      cols: 1
+ #   Button:
+  #      text: "OK"
+  #      size_hint: 0.4, 0.1
+  #      pos_hint: {"x":0.3, "y":0.1}
+   #     on_release:
+   #         root.dismiss()
 <ImageButton@Button>:
 	background_normal: 'graphics/titlebar.png'
 	background_down: 'graphics/pressed.png'
@@ -496,6 +552,62 @@ Manager:
         Label:
             text: "POMOC"
 
+<PopLay>:
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: .8
+        pos_hint: {"center_x":.5,'y': .7}
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            Label:
+                text: 'Id kierowcy'
+                size_hint_x: .3
+            Label:
+                text: 'Imie'
+                size_hint_x: .4
+            Label:
+                text: 'Nazwisko'
+                size_hint_x: .4
+            Label:
+                text: ''
+                size_hint_x: .2
+        BoxLayout:
+            id: input
+            size_hint_y: None
+            pos_hint_x: 1
+            height: 30
+            TextInput:
+                id: driver_id
+                multiline: False
+                size_hint_x:.3
+            TextInput:
+                id: name
+                multiline: False
+                size_hint_x:.3
+            TextInput:
+                id: last_name
+                multiline: False
+                size_hint_x:.3
+            Button:
+                id:add
+                text: 'Dodaj'
+                on_release:
+                    root.add_driver()
+                size_hint_x:0.2
+    GridLayout:
+        pos_hint: {'center_x':0.55, 'top': 0.7}
+        size_hint_x: 1
+        size_hint_y: None
+        size:
+        id:list
+        cols: 1
+    Button:
+        text: "OK"
+        size_hint: 0.4, 0.1
+        pos_hint: {"x":0.3, "y":0.1}
+        on_release:
+            root.dismiss()
 <Rozpocznij>:
     name: "rozpocznij"
     canvas.before:
@@ -739,68 +851,6 @@ Manager:
 	            pos_hint: {"x":0.51,"y":0.15}
 	            size: 130,40
 	            text: "Edytuj kierowce"
-
-
-<PopLay>:
-    BoxLayout:
-        orientation: 'vertical'
-        size_hint_x: .8
-        pos_hint: {"center_x":.5,'y': .7}
-        BoxLayout:
-            size_hint_y: None
-            height: 50
-            Label:
-                text: 'Id kierowcy'
-                size_hint_x: .3
-            Label:
-                text: 'Imie'
-                size_hint_x: .4
-            Label:
-                text: 'Nazwisko'
-                size_hint_x: .4
-            Label:
-                text: ''
-                size_hint_x: .2
-        BoxLayout:
-            id: input
-            size_hint_y: None
-            pos_hint_x: 1
-            height: 30
-            TextInput:
-                id: driver_id
-                multiline: False
-                size_hint_x:.3
-            TextInput:
-                id: name
-                multiline: False
-                size_hint_x:.3
-            TextInput:
-                id: last_name
-                multiline: False
-                size_hint_x:.3
-            Button:
-                id:add
-                text: 'Dodaj'
-                on_release:
-                    root.add_driver()
-                size_hint_x:0.2
-    GridLayout:
-        pos_hint: {'center_x':0.55, 'top': 0.7}
-        size_hint_x: 1
-        size_hint_y: None
-        size:
-        id:list
-        cols: 1
-    Button:
-        text: "OK"
-        size_hint: 0.4, 0.1
-        pos_hint: {"x":0.3, "y":0.1}
-        on_release:
-            root.dismiss()
-
-
-
-
 
 
 

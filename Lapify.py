@@ -2,14 +2,11 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, SwapTransition
+from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, SwapTransition, FadeTransition
 from kivy.core.window import Window
 from kivy.uix.widget import Widget
-from kivy.uix.popup import Popup
-from kivy.uix.stacklayout import StackLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.config import Config
-import kivy.utils
 
 
 Config.set('graphics', 'resizable', False)
@@ -49,15 +46,7 @@ class Rozpocznij(Screen):
         Manager.transition = SwapTransition()
 
     def unswap(self):
-        Manager.transition = NoTransition()
-
-
-class Stack(StackLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def btn(self):
-        show_popup()
+        Manager.transition = FadeTransition()
 
 
 class Manager(ScreenManager):
@@ -66,12 +55,11 @@ class Manager(ScreenManager):
         self.transition = NoTransition()
 
 
-kv = Builder.load_file("lapify.kv")
+kv = Builder.load_file("design.kv")
 
 
-class PopLay(FloatLayout):
+class DodajKierowce(FloatLayout):
     def add_driver(self):
-        print("button dziala")
         grid = self.ids.list
 
         id = self.ids.driver_id.text
@@ -93,14 +81,14 @@ class PopLay(FloatLayout):
 
 
 class LapifyApp(App):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.driverReference = DodajKierowce()
+
     def build(self):
         return kv
 
 
-def show_popup():
-    show = PopLay()
-    popupWindow = Popup(title="Rozpocznij nowa sesje", content=show, size_hint=(.5, .7), auto_dismiss=False)
-    popupWindow.open()
 
 
 if __name__ == '__main__':
