@@ -14,6 +14,10 @@ Manager:
     PoprzednieSesje:
     Pomoc:
 
+<OrangeLabel@Label>
+    font_name: 'graphics/Roboto-Light'
+    font_size: '20'
+    color: 1,.5,0,1
 
 
 <ImageButton@Button>:
@@ -24,6 +28,10 @@ Manager:
 	color: 0,0,0,1
 	font_name: 'graphics/Roboto-Light'
 	font_size: '14'
+
+<Lista>:
+
+
 
 <NowaSesja>:
     name: "nowa"
@@ -70,7 +78,9 @@ Manager:
                 size_hint: None, None
                 pos: root.width-self.width+20,root.height-230
                 size:250,250
-
+######################################################
+#   zawartosc karty strona glowna
+######################################################
 
             Button:
                 background_color: hex('#FFFFFF')
@@ -78,7 +88,7 @@ Manager:
                 size_hint: 0.22, 0.1
                 text: "Rozpocznij nowa sesje"
                 on_press:
-                    self.background_color = (.1,.1,.1,1)
+                    self.background_color = (.1,.1,.1,0)
                 on_release:
                     app.root.current = "rozpocznij"
                     self.background_color = (1,1,1,1)
@@ -337,6 +347,8 @@ Manager:
                     Label:
                         text: ""
 
+
+
 <PoprzednieSesje>:
     name: "poprzednie"
     canvas:
@@ -381,7 +393,9 @@ Manager:
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
-
+######################################################
+#   zawartosc karty poprzednie sesje
+######################################################
         Label:
             text: "POPRZEDNIE SESJE"
 
@@ -430,7 +444,9 @@ Manager:
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
-
+######################################################
+#   zawartosc karty pomoc
+######################################################
         Label:
             text: "LIVE"
 
@@ -478,9 +494,60 @@ Manager:
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
+######################################################
+#   zawartosc karty pomoc
+######################################################
+        BoxLayout:
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    size_hint_y: .2
+                OrangeLabel:
+                    text: "W przypadku problemow z aplikacja \n                 prosimy o kontakt:"
+                    size_hint_y: .2
+                OrangeLabel:
+                    size_hint_y: .3
+                    text: "info@globallogic.com"
+                    font_size: '32'
+                Label:
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    size_hint_y: .2
+                OrangeLabel:
+                    text: "Lapify v0.0.1"
+                    font_size: '32'
+                    size_hint_y: 0.1
+                OrangeLabel:
+                    text: "Dla Global Logic S. A."
+                    size_hint_y: 0.1
+                    font_size: '32'
+                Label:
 
-        Label:
-            text: "POMOC"
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    size_hint_y: .5
+                OrangeLabel:
+                    text: "Autorzy: "
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Aleksandra Chudzinska"
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Piotr Janicki"
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Aleksandra Kaczmarska"
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Mikolaj Stojek"
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Anna Zieba"
+                    size_hint_y: .1
+                Label:
+
 
 <PopLay>:
     BoxLayout:

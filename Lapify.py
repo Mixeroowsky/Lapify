@@ -3,15 +3,13 @@ from kivy.uix.label import Label
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition, SwapTransition, FadeTransition
-from kivy.core.window import Window
 from kivy.uix.widget import Widget
-from kivy.uix.floatlayout import FloatLayout
 from kivy.config import Config
-
-
-Config.set('graphics', 'resizable', False)
-Window.size = (1280, 720)
-
+Config.set('graphics', 'resizable', 0)
+Config.set('graphics', 'width', '1280')
+Config.set('graphics', 'height', '720')
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+#Config.set('kivy', 'exit_on_escape', '0')
 
 class NowaSesja(Screen):
     pass
@@ -20,6 +18,8 @@ class NowaSesja(Screen):
 class NowyKierowca(Screen):
     pass
 
+class Lista(Screen):
+    pass
 
 class WybierzKierowce(Screen):
     pass
