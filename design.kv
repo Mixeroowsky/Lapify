@@ -77,8 +77,11 @@ Manager:
                 pos_hint:{"x":0.642,"top":0.42}
                 size_hint: 0.22, 0.1
                 text: "Rozpocznij nowa sesje"
+                on_press:
+                    self.background_color = (.1,.1,.1,1)
                 on_release:
                     app.root.current = "rozpocznij"
+                    self.background_color = (1,1,1,1)
 	        Label:
 	        	size_hint: (None,None)
 	            pos_hint: {"x":0.07,"y":0.79}
@@ -519,7 +522,10 @@ Manager:
             Button:
                 id:add
                 text: 'Dodaj'
+                on_press:
+                    self.background_color = (.1,.1,.1,1)
                 on_release:
+                    self.background_color = (1,1,1,1)
                     root.add_driver()
                 size_hint_x:0.2
     GridLayout:
@@ -533,7 +539,10 @@ Manager:
         text: "OK"
         size_hint: 0.4, 0.1
         pos_hint: {"x":0.3, "y":0.1}
+        on_press:
+            self.background_color = (.1,.1,.1,1)
         on_release:
+            self.background_color = (1,1,1,1)
             root.dismiss()
 
 <DodajKierowce>:
@@ -653,7 +662,11 @@ Manager:
                             Button:
                                 id:add
                                 text: 'Dodaj'
-                                on_release: root.add_driver()
+                                on_press:
+                                    self.background_color = (.1,.1,.1,1)
+                                on_release:
+                                    root.add_driver()
+                                    self.background_color = (1,1,1,1)
                                 size_hint_x: .2
                     GridLayout:
                         pos_hint: {'center_x':0.55, 'top': 1}
@@ -666,8 +679,11 @@ Manager:
                 size_hint: 0.1, 0.05
                 pos_hint:{"center_x":0.5,"y":0.13}
                 text: 'Ok'
+                on_press:
+                    self.background_color = (.1,.1,.1,1)
                 on_release:
                     app.root.current = "rozpocznij"
+                    self.background_color = (1,1,1,1)
 
 <Rozpocznij>:
     name: "rozpocznij"
@@ -880,36 +896,53 @@ Manager:
 	            pos_hint: {"x":0.18,"y":0.15}
 	            size: 110,40
 	            text: "Cofnij"
+	            on_press:
+                    self.background_color = (.1,.1,.1,1)
 	            on_release:
 	                app.root.current = "nowa"
+	                self.background_color = (1,1,1,1)
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.7,"y":0.15}
 	            size: 110,40
 	            text: "Dalej"
+	            on_press:
+                    self.background_color = (.1,.1,.1,1)
 	            on_release:
                     root.swap()     #fajne przejście
 	                app.root.current = "live"
                     root.unswap()   #powrót do normalnego
+                    self.background_color = (1,1,1,1)
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.3,"y":0.15}
 	            size: 130,40
 	            text: "Dodaj kierowce"
+	            on_press:
+                    self.background_color = (.1,.1,.1,1)
                 on_release:
                     app.root.current = "dodaj"
+                    self.background_color = (1,1,1,1)
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.405,"y":0.15}
 	            size: 130,40
+	            on_press:
+                    self.background_color = (.1,.1,.1,1)
+                on_release:
+                    self.background_color = (1,1,1,1)
 	            text: "Usun kierowce"
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.51,"y":0.15}
 	            size: 130,40
+	            on_press:
+                    self.background_color = (.1,.1,.1,1)
+                on_release:
+                    self.background_color = (1,1,1,1)
 	            text: "Edytuj kierowce"
 
