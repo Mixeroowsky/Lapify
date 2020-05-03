@@ -55,10 +55,9 @@ class Manager(ScreenManager):
         self.transition = NoTransition()
 
 
-kv = Builder.load_file("design.kv")
 
 
-class DodajKierowce(FloatLayout):
+class DodajKierowce(Screen):
     def add_driver(self):
         grid = self.ids.list
 
@@ -80,6 +79,7 @@ class DodajKierowce(FloatLayout):
         list.add_widget(empty)
 
 
+kv = Builder.load_file("design.kv")
 class LapifyApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
