@@ -1,18 +1,21 @@
 #:kivy 1.11.1
-#: import FadeTransition kivy.uix.screenmanager.FadeTransition
+#: import NoTransition kivy.uix.screenmanager.NoTransition
 #:import hex kivy.utils.get_color_from_hex
 #:import utils kivy.utils
 #:import Factory kivy.factory.Factory
 Manager:
-	transition: FadeTransition()
+	transition: NoTransition()
     NowaSesja:
     Rozpocznij:
     NowyKierowca:
     WybierzKierowce:
     Live:
     PoprzednieSesje:
+    HistoriaWyscigu:
     Pomoc:
+    Refresh:
 
+################################################################################################
 <DodajKierowce@Popup>:
     title: "Dodaj kierowce"
     size_hint: (None, None)
@@ -73,22 +76,7 @@ Manager:
             on_release:
                 root.dismiss()
 
-
-
-#<PopLay>:
- #   GridLayout:
- #       pos_hint: {'center_x':0.55, 'top': 0.7}
- #       size_hint_x: 1
- #       size_hint_y: None
-  #      size:
-  #      id:list
-  #      cols: 1
- #   Button:
-  #      text: "OK"
-  #      size_hint: 0.4, 0.1
-  #      pos_hint: {"x":0.3, "y":0.1}
-   #     on_release:
-   #         root.dismiss()
+################################################################################################
 <ImageButton@Button>:
 	background_normal: 'graphics/titlebar.png'
 	background_down: 'graphics/pressed.png'
@@ -98,6 +86,11 @@ Manager:
 	font_name: 'graphics/Roboto-Light'
 	font_size: '14'
 
+################################################################################################
+<Button>:          # Pomarańczowe guziczki
+    background_down: 'graphics/pressed.png'
+
+################################################################################################
 <NowaSesja>:
     name: "nowa"
     canvas:
@@ -116,6 +109,7 @@ Manager:
 			    size: self.width, 40
 
         ImageButton:
+            background_normal: 'graphics/pressed.png'
             text: "Strona glowna"
             on_release:
                 app.root.current = "nowa"
@@ -147,11 +141,20 @@ Manager:
 
             Button:
                 background_color: hex('#FFFFFF')
-                pos_hint:{"x":0.642,"top":0.42}
+                pos_hint:{"x":0.68,"top":0.55}
                 size_hint: 0.22, 0.1
                 text: "Rozpocznij nowa sesje"
                 on_release:
+                    root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
                     app.root.current = "rozpocznij"
+                    root.unfade()
+            Button:
+                background_color: hex('#FFFFFF')
+                pos_hint:{"x":0.68,"top":0.3}
+                size_hint: 0.22, 0.1
+                text: "Koniec"
+                on_release:
+                    app.stop()   # Wychodzenie z apki przyciskiem
 	        Label:
 	        	size_hint: (None,None)
 	            pos_hint: {"x":0.07,"y":0.79}
@@ -160,6 +163,7 @@ Manager:
 	            color: hex('#EF8B00')
 
             BoxLayout:   #kolumny
+                spacing: 0.5
                 size_hint: (None,None)
                 size: (730,500)
                 pos_hint:{"x":0.02,"y":0.12}
@@ -407,6 +411,7 @@ Manager:
                     Label:
                         text: ""
 
+################################################################################################
 <PoprzednieSesje>:
     name: "poprzednie"
     canvas:
@@ -444,6 +449,7 @@ Manager:
             on_release:
                 app.root.current = "live"
         ImageButton:
+            background_normal: 'graphics/pressed.png'
             text: "Poprzednie Sesje"
             on_release:
                 app.root.current = "poprzednie"
@@ -452,19 +458,63 @@ Manager:
             on_release:
                 app.root.current = "pomocy"
 
-        Label:
-            text: "POPRZEDNIE SESJE"
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: root.width-self.width+20,root.height-650
+			    size: 930,550
+	    Label:
+            text: 'Historia wyscigow:'
+            color: hex('#EF8B00')
+            pos: -490,290
+            font_size: '30'
+        GridLayout:
+            pos: root.width-self.width-45,root.height-480
+			size: 930,550
+            height: 25
+            cols: 6
+            Label:
+                text: "ID wyscigu"
+                color: hex('#303030')
+            Label:
+                text: "Nazwa wyscigu"
+                color: hex('#303030')
+            Label:
+                text: "Data"
+                color: hex('#303030')
+            Label:
+                text: " "
+            Label:
+                text: " "
+            Label:
+                text: " "
+            FloatLayout:
+                Button:
+	                background_color: hex('#FFFFFF')
+	                pos: root.width-self.width-350,root.height-180
+	                size_hint: (None,None)
+	                size: 900, 40
+	                text: "Przykladowy wyscig"
+	                on_release:
+                        app.root.current = "historia"
 
-
+################################################################################################
 <Live>:
     name: "live"
+    on_pre_enter: tabelaLive.clear_widgets()    # Czyścimy tabele
+    on_enter: root.generuj()    # Wyświetlamy zaktualizowaną
+
     canvas:
         Color:
 	        rgba: hex('#6F696D')
 	    Rectangle:
 	        pos: self.pos
 	        size: self.size
+
     FloatLayout:
+
         Image:
             source: 'graphics/lapify.png'
             size_hint: None, None
@@ -489,6 +539,7 @@ Manager:
             on_release:
                 app.root.current = "nowa"
         ImageButton:
+            background_normal: 'graphics/pressed.png'
             text: "Live"
             on_release:
                 app.root.current = "live"
@@ -501,9 +552,55 @@ Manager:
             on_release:
                 app.root.current = "pomocy"
 
-        Label:
-            text: "LIVE"
+        FloatLayout:
+            id: plansza
 
+            TextInput:
+                id: czas
+                multiline: False
+                pos_hint: {"x":0.75,"y":0.6}
+                size_hint: (None,None)
+                size: (100,50)
+            Button:
+                pos_hint:{"x":0.75,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: "REFRESH"
+                on_release:
+                    app.root.current = "refresh"
+                    app.root.current = "live"
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (734,504.5)
+                pos_hint:{"x":0.0185,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:      # Tabela
+                id: tabelaLive
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (730,500)
+                pos_hint:{"x":0.02,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+
+
+
+
+################################################################################################
 <Pomoc>:
     name: "pomocy"
     canvas:
@@ -545,6 +642,7 @@ Manager:
             on_release:
                 app.root.current = "poprzednie"
         ImageButton:
+            background_normal: 'graphics/pressed.png'
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
@@ -552,6 +650,7 @@ Manager:
         Label:
             text: "POMOC"
 
+################################################################################################
 <PopLay>:
     BoxLayout:
         orientation: 'vertical'
@@ -608,6 +707,8 @@ Manager:
         pos_hint: {"x":0.3, "y":0.1}
         on_release:
             root.dismiss()
+
+################################################################################################
 <Rozpocznij>:
     name: "rozpocznij"
     canvas.before:
@@ -820,7 +921,9 @@ Manager:
 	            size: 110,40
 	            text: "Cofnij"
 	            on_release:
+	                root.fade()
 	                app.root.current = "nowa"
+	                root.unfade()
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
@@ -852,6 +955,117 @@ Manager:
 	            size: 130,40
 	            text: "Edytuj kierowce"
 
+################################################################################################
+<HistoriaWyscigu>:
+    name:"historia"
+    on_enter:
+        tabelaHistoria.clear_widgets()    # Czyścimy tabele
+        root.generuj()    # Wyświetlamy zaktualizowaną
 
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Strona glowna"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        id: oknoHistoria
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (654,394.5)
+                pos_hint:{"x":0.2382,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaHistoria
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (650,390)
+                pos_hint:{"x":0.24,"y":0.2}
+                canvas:
+                    Color:
+                        rgba: hex('#707070')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+
+            Button:
+                size_hint: 0.1, 0.05
+                pos_hint:{"center_x":0.5,"y":0.13}
+                text: 'Wroc'
+                on_release:
+                    app.root.current = "poprzednie"
+
+################################################################################################
+<Refresh>:
+    name: "refresh"
+
+    canvas:
+        Color:
+	        rgba: hex('#000000')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
 
 
