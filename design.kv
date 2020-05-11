@@ -661,6 +661,13 @@ Manager:
 	            font_size: '18'
 	            text: "Nazwa wyscigu:"
 	            color: hex('#000000')
+	        Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.56,"y":0.732}
+	            size: 40,40
+	            text: "OK"
+	            on_release: root.input()
 	        TextInput:
 	            id: wyscig
 	            size_hint: (None,None)
@@ -812,7 +819,7 @@ Manager:
 	            text: "Dalej"
 	            on_release:
                     root.swap()     #fajne przejście
-                    root.input()
+
 	                app.root.current = "live"
                     root.unswap()   #powrót do normalnego
 	        Button:
@@ -840,6 +847,10 @@ Manager:
 ################################################################################################
 <HistoriaWyscigu>:
     name:"historia"
+    on_enter:
+        tabelaHistoria.clear_widgets()    # Czyścimy tabele
+        root.generuj()    # Wyświetlamy zaktualizowaną
+
     canvas.before:
         Color:
 	        rgba: hex('#6F696D')
@@ -899,63 +910,40 @@ Manager:
 			    size: 930,550
 
 	    FloatLayout:
-	        Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.23,"y":0.76}
-	            font_size: '24'
-	            text: "Historia Wyscigu"
-	            color: hex('#000000')
-	        BoxLayout:
-                orientation: 'horizontal'
-                size_hint: (0.65, 0.5) #rozmiar ciemnoszarego tla
-                pos_hint:{"x":0.17,"y":0.2}
+	        id: oknoHistoria
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (654,394.5)
+                pos_hint:{"x":0.2382,"y":0.1965}
                 canvas:
                     Color:
-                        rgba: hex('#404040')
+                        rgba: hex('#606060')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                FloatLayout:
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint_x: .8
-                        pos_hint: {"center_x":.5,'y': 1} #pozycja labelow i inputow
-                        BoxLayout:
-                            size_hint_y: None
-                            height: 50
 
-                            Label:
-                                text: 'ID Kierowcy'
-                                size_hint_x: .4
-                            Label:
-                                text: 'ID Wyscigu'
-                                size_hint_x: .4
+            StackLayout:
+                id: tabelaHistoria
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (650,390)
+                pos_hint:{"x":0.24,"y":0.2}
+                canvas:
+                    Color:
+                        rgba: hex('#707070')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
 
-                            Label:
-                                text: 'Czas'
-                                size_hint_x: .4
-                            Label:
-                                text: 'data'
-                                size_hint_x: .4
-
-                            Label:
-                                text: ''
-                                size_hint_x: .2
-
-                    GridLayout:
-                        pos_hint: {'center_x':0.55, 'top': 1}
-                        size_hint_x: 1
-                        size_hint_y: None
-                        size:
-                        id:list
-                        cols: 1
             Button:
                 size_hint: 0.1, 0.05
                 pos_hint:{"center_x":0.5,"y":0.13}
                 text: 'Wroc'
                 on_release:
                     app.root.current = "poprzednie"
-
 ######################################################
 <Refresh>:
     name: "refresh"

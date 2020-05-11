@@ -37,6 +37,9 @@ Builder.load_string("""
     Rectangle:
       pos: self.pos
       size: self.size
+<HistoriaButton>:
+  background_down: 'graphics/pressed.png'
+  on_release: app.root.current = "historia"
 """)
 
 dane = []  # Przyda sie potem
@@ -116,6 +119,10 @@ class DatabaseConnecion:
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
+
+
+class HistoriaButton(Button):
+    pass
 
 
 class NowaSesja(Screen):
@@ -218,7 +225,7 @@ class Live(Screen):
 
         sortowane = sorted(dane, key=lambda data: data[4])  # Lista posortowana wg wartosci
 
-        nazwa_wyscigu = "[RACE NAME]"  # Tutaj wrzucić nazwe wyscigu z bazy
+        nazwa_wyscigu = "NAZWA WYSCIGU"  # Tutaj wrzucić nazwe wyscigu z bazy
 
         bg.add_widget(Label(text=f"Wyscig {nazwa_wyscigu}",
                             size_hint=(None, None),
@@ -295,9 +302,10 @@ class PoprzednieSesje(Screen):
                            color=get_color_from_hex('ffffff'),
                            size=(157, 35)))
             tab.add_widget(
-                Button(text="Wiecej",
+                HistoriaButton(text="Wiecej",
                        size_hint=(None, None),
-                       size=(120, 35)))
+                       size=(120, 35)
+                       ))
             licznik += 1
 
         cursor.close()
@@ -325,20 +333,37 @@ class HistoriaWyscigu(Screen):
 
         cursor = connection.cursor()
 
-        cursor.execute("SELECT k.imie, k.nazwisko, w.data, w.nazwa_wyscigu\
+
+        cursor.execute("SELECT k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu\
                         FROM public.kierowca AS k\
                         JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
-                        JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu;")
+                        JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu"
+                       "    where w.id_wyscigu = 1 ;")
 
         dane = cursor.fetchall()
 
-        nazwa_wyscigu = dane[0][3]
+        nazwa_wyscigu = dane[0][5]
+        data = dane[0][4]
+        kategoria = dane[0][3]
 
         bg.add_widget(Label(text=f"Historia wyscigu {nazwa_wyscigu}",
                             size_hint=(None,None),
-                            pos_hint={"x":0.45,"y":0.73},
+                            pos_hint={"x":0.45,"y":0.755},
                             font_size="24",
                             color=get_color_from_hex('#000000')))
+
+        bg.add_widget(Label(text=f"Data: {data}",
+                            size_hint=(None,None),
+                            pos_hint={"x":0.27,"y":0.7},
+                            font_size="20",
+                            color=get_color_from_hex('#000000')))
+
+        bg.add_widget(Label(text=f"Kategoria: {kategoria}",
+                            size_hint=(None,None),
+                            pos_hint={"x":0.55,"y":0.7},
+                            font_size="20",
+                            color=get_color_from_hex('#000000')))
+
 
         # Wyświetlanie tytułów tabeli:
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
@@ -414,6 +439,7 @@ class DodajKierowce(Screen):
         model = self.ids.model.text
         kategoria = self.ids.category.text
         rfid = self.ids.tag.text
+
         list = BoxLayout(size_hint_y=None, height=30, pos_hint={'top': .5})
         grid.add_widget(list)
 
@@ -422,9 +448,11 @@ class DodajKierowce(Screen):
         imie = Label(text=imie, size_hint_x=.2)
         nazwisko = Label(text=nazwisko, size_hint_x=.2)
         rfid = Label(text=rfid,size_hint_x=.2)
+
         model = Label(text=model, size_hint_x=.2)
         kategoria = Label(text=kategoria, size_hint_x=.2)
         empty = Label(text="", size_hint_x=.3)
+
 
 
 
@@ -434,6 +462,7 @@ class DodajKierowce(Screen):
         list.add_widget(model)
         list.add_widget(kategoria)
         list.add_widget(rfid)
+
         list.add_widget(empty)
 
 
@@ -452,13 +481,16 @@ class DodajKierowce(Screen):
         t = cursor.fetchall()
 
         cursor = connection.cursor()
+        cursor.execute("SELECT id_wyscigu FROM wyscig WHERE data_wyscigu = (select max(data_wyscigu) from wyscig) ")
+        b = cursor.fetchall()
+        print(b)
+
+        cursor = connection.cursor()
         cursor.execute(" INSERT INTO kierowca ( id_kierowcy, imie, nazwisko, model_samochodu, kategoria) VALUES (%s,%s,%s,%s,%s)",
                        (len(rows) + 1, self.ids.name.text, self.ids.last_name.text,self.ids.model.text,
                         self.ids.category.text))
-        cursor.execute("INSERT INTO przypisanie (id_kierowcy,rfid,id_przypisania ) VALUES (%s,%s,%s)",
-                       (len(rows)+1,self.ids.tag.text,len(t)+1)
-
-                       )
+        cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
+                       (len(t)+1, b[0], len(rows)+1, self.ids.tag.text))
         connection.commit()
         connection.close()
 
