@@ -9,13 +9,11 @@ Manager:
     Rozpocznij:
     NowyKierowca:
     WybierzKierowce:
-    DodajKierowce:
     Live:
     PoprzednieSesje:
     HistoriaWyscigu:
     Pomoc:
     Refresh:
-
 
 ################################################################################################
 <OrangeLabel@Label>
@@ -37,13 +35,11 @@ Manager:
 	font_name: 'graphics/Roboto-Light'
 	font_size: '14'
 
-
 ################################################################################################
 <NowaSesja>:
     name: "nowa"
     on_pre_enter: tabelaOstatniaSesja.clear_widgets()    # Czyścimy tabele
     on_enter: root.generujtabele()    # Wyświetlamy zaktualizowaną
-
     canvas:
         Color:
 	        rgba: hex('#6F696D')
@@ -58,7 +54,6 @@ Manager:
 			    source: 'graphics/titlebar.png'
 			    pos: 0, self.height-40
 			    size: self.width, 40
-
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: root.text1
@@ -76,7 +71,6 @@ Manager:
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
-
         FloatLayout:
             Image:
                 source: 'graphics/lapify.png'
@@ -88,8 +82,6 @@ Manager:
                 size_hint: None, None
                 pos: root.width-self.width+20,root.height-230
                 size:250,250
-
-
             Button:
                 background_color: hex('#FFFFFF')
                 pos_hint:{"x":0.68,"top":0.55}
@@ -99,7 +91,6 @@ Manager:
                     root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
                     app.root.current = "rozpocznij"
                     root.unfade()
-
             Button:
                 background_color: hex('#FFFFFF')
                 pos_hint:{"x":0.68,"top":0.4}
@@ -113,10 +104,8 @@ Manager:
 	            font_size: '30'
 	            text: "Ostatnia sesja:"
 	            color: hex('#EF8B00')
-
             FloatLayout:
                 id: p_ostatnia_sesja
-
                 GridLayout:      # Ciemna obwódka wokół tabeli
                     cols: 1
                     size_hint: (None,None)
@@ -174,7 +163,6 @@ Manager:
 			    source: 'graphics/titlebar.png'
 			    pos: 0, self.height-40
 			    size: self.width, 40
-
         ImageButton:
             text: root.text1
             on_release:
@@ -196,7 +184,6 @@ Manager:
 
 	    FloatLayout:
 	        id: oknoPoprzednie
-
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
@@ -208,7 +195,6 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
             StackLayout:      # Tabela
                 id: tabelaPoprzednie
                 orientation: 'lr-tb'
@@ -223,34 +209,18 @@ Manager:
                         pos: self.pos
                         size: self.size
 
-    #FloatLayout:    #okienko
-	 #   canvas:
-	#	    Color:
-	#		    rgba: hex('#808080')
-	#	    Rectangle:
-	#		    pos: root.width-self.width+20,root.height-650
-	#		    size: 930,550
-	 #   Label:
-      #      text: 'Historia wyscigow:'
-       #     color: hex('#EF8B00')
-         #   pos: -490,290
-        #    font_size: '30'
-
 ######################################################
 <Live>:
     name: "live"
     on_pre_enter: tabelaLive.clear_widgets()    # Czyścimy tabele
     on_enter: root.generuj()    # Wyświetlamy zaktualizowaną
-
     canvas:
         Color:
 	        rgba: hex('#6F696D')
 	    Rectangle:
 	        pos: self.pos
 	        size: self.size
-
     FloatLayout:
-
         Image:
             source: 'graphics/lapify.png'
             size_hint: None, None
@@ -269,7 +239,6 @@ Manager:
 			    source: 'graphics/titlebar.png'
 			    pos: 0, self.height-40
 			    size: self.width, 40
-
         ImageButton:
             text: root.text1
             on_release:
@@ -287,10 +256,8 @@ Manager:
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
-
         FloatLayout:
             id: plansza
-
             TextInput:
                 id: czas
                 multiline: False
@@ -305,7 +272,6 @@ Manager:
                 on_release:
                     app.root.current = "refresh"
                     app.root.current = "live"
-
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
@@ -317,7 +283,6 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
             StackLayout:      # Tabela
                 id: tabelaLive
                 orientation: 'lr-tb'
@@ -360,7 +325,6 @@ Manager:
 			    source: 'graphics/titlebar.png'
 			    pos: 0, self.height-40
 			    size: self.width, 40
-
         ImageButton:
             text: root.text1
             on_release:
@@ -408,7 +372,6 @@ Manager:
                     size_hint_y: 0.1
                     font_size: '32'
                 Label:
-
             BoxLayout:
                 orientation: 'vertical'
                 Label:
@@ -417,9 +380,7 @@ Manager:
                     text: "Autorzy: "
                     size_hint_y: .1
                 OrangeLabel:
-
                     text: root.text3
-
                     size_hint_y: .1
                 OrangeLabel:
                     text: "Piotr Janicki"
@@ -436,169 +397,6 @@ Manager:
 
                     size_hint_y: .1
                 Label:
-
-######################################################
-<DodajKierowce>:
-    name: "dodaj"
-    canvas.before:
-        Color:
-	        rgba: hex('#6F696D')
-	    Rectangle:
-	        pos: self.pos
-	        size: self.size
-    canvas:
-        Color:
-            rgba: (0,0,0,.3)
-        Rectangle:
-            size:self.width, self.height
-    FloatLayout:
-        Image:
-            source: 'graphics/lapify.png'
-            color: (1,1,1,.5)
-            size_hint: None, None
-            pos: root.width-(self.width+200),root.height-160
-            size: 120,120
-        Image:
-            source: 'graphics/gllogo.png'
-            size_hint: None, None
-            pos: root.width-self.width+20,root.height-230
-            size:250,250
-    StackLayout:    #przyciemniony górny pasek
-        canvas:
-            Color:
-                rgba: (1,1,1,1)
-            Rectangle:
-                source: 'graphics/pressed.png'
-                pos: 0, self.height-40
-                size: self.width, 40
-        ImageButton:
-            background_normal: 'graphics/pressed.png'
-
-            text: root.text1
-
-        ImageButton:
-            background_normal: 'graphics/pressed.png'
-            text: "Live"
-        ImageButton:
-            background_normal: 'graphics/pressed.png'
-            text: "Poprzednie Sesje"
-        ImageButton:
-            background_normal: 'graphics/pressed.png'
-            text: "Pomoc"
-    FloatLayout:    #czarna ramka wokół okienka
-	    canvas:
-		    Color:
-			    rgba: hex('#000000')
-		    Rectangle:
-			    pos: 173,73
-			    size: 934,554
-    FloatLayout:    #okienko
-	    canvas:
-		    Color:
-			    rgba: hex('#808080')
-		    Rectangle:
-			    pos: 175,75
-			    size: 930,550
-
-	    FloatLayout:
-	        Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.23,"y":0.76}
-	            font_size: '24'
-
-	            text: root.text2
-
-	            color: hex('#000000')
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint: (0.65, 0.5) #rozmiar ciemnoszarego tla
-                pos_hint:{"x":0.17,"y":0.2}
-                canvas:
-                    Color:
-                        rgba: hex('#404040')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
-                FloatLayout:
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint_x: .8
-                        pos_hint: {"center_x":.5,'y': 1} #pozycja labelow i inputow
-                        BoxLayout:
-                            size_hint_y: None
-                            height: 50
-
-                            Label:
-
-                                text: root.text3
-
-                                size_hint_x: .4
-                            Label:
-                                text: 'Nazwisko'
-                                size_hint_x: .4
-
-                            Label:
-                                text: 'Model'
-                                size_hint_x: .4
-                            Label:
-                                text: 'Kategoria'
-                                size_hint_x: .4
-                            Label:
-                                text: 'RFID'
-                                size_hint_x: .4
-
-
-
-                            Label:
-                                text: ''
-                                size_hint_x: .2
-                        BoxLayout:
-                            id: input
-                            size_hint_y: None
-                            pos_hint_x: 1
-                            height: 30
-
-                            TextInput:
-                                id: name
-                                multiline: False
-                                size_hint_x: .3
-                            TextInput:
-                                id: last_name
-                                multiline: False
-                                size_hint_x: .3
-
-                            TextInput:
-                                id: model
-                                multiline: False
-                                size_hint_x: .3
-                            TextInput:
-                                id: category
-                                multiline: False
-                                size_hint_x: .3
-                            TextInput:
-                                id: tag
-                                multiline: False
-                                size_hint_x: .3
-
-                            Button:
-                                id:add
-                                text: 'Dodaj'
-                                on_release: root.add_driver()
-                                size_hint_x: .2
-                    GridLayout:
-                        pos_hint: {'center_x':0.55, 'top': 1}
-                        size_hint_x: 1
-                        size_hint_y: None
-                        size:
-                        id:list
-                        cols: 1
-            Button:
-                size_hint: 0.1, 0.05
-                pos_hint:{"center_x":0.5,"y":0.13}
-                text: 'Ok'
-                on_release:
-                    app.root.current = "rozpocznij"
-
 
 ######################################################
 <Rozpocznij>:
@@ -673,13 +471,6 @@ Manager:
 	            font_size: '18'
 	            text: root.text2
 	            color: hex('#000000')
-	        Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
-	            pos_hint: {"x":0.56,"y":0.732}
-	            size: 40,40
-	            text: "OK"
-	            on_release: root.input()
 	        TextInput:
 	            id: wyscig
 	            size_hint: (None,None)
@@ -689,8 +480,7 @@ Manager:
 	            multiline: False
             BoxLayout:
                 orientation: 'horizontal'
-                size_hint: (None,None)
-                size: (570,320)
+                size_hint: .65,.42
                 pos_hint:{"x":0.17,"y":0.25}
                 canvas:
                     Color:
@@ -698,121 +488,42 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint: (None,None)
-                    size: (190,320)
-                    canvas:
-                        Color:
-                            rgba: hex('#404040')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        text: "ID Kierowcy"
-                        canvas.before:
-                            Color:
-                                rgba: hex('#303030')
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
-                    Label:
-                        text: "01"
-                    Label:
-                        text: "02"
-                    Label:
-                        text: "03"
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint: (None,None)
-                    size: (190,320)
-                    canvas:
-                        Color:
-                            rgba: hex('#404040')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        text: "Imie"
-                        canvas.before:
-                            Color:
-                                rgba: hex('#303030')
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
-                    Label:
-                        text: "Andrzej"
-                    Label:
-                        text: "Monika"
-                    Label:
-                        text: "Krystian"
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint: (None,None)
-                    size: (190,320)
-                    canvas:
-                        Color:
-                            rgba: hex('#404040')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        text: "Nazwisko"
-                        canvas.before:
-                            Color:
-                                rgba: hex('#303030')
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
-                    Label:
-                        text: "Motyka"
-                    Label:
-                        text: "Kielbasa"
-                    Label:
-                        text: "Nowak"
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-
+                FloatLayout:
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_x: 1
+                        pos_hint: {"center_x":.52,'y': .98} #pozycja labelow i inputow
+                        BoxLayout:
+                            size_hint_y: None
+                            height: 50
+                            Label:
+                                text: 'LP.'
+                                size_hint_x: .1
+                            Label:
+                                text: 'Imie'
+                                size_hint_x: .5
+                            Label:
+                                text: 'Nazwisko'
+                                size_hint_x: .5
+                            Label:
+                                text: 'Model'
+                                size_hint_x: .5
+                            Label:
+                                text: 'Kategoria'
+                                size_hint_x: .5
+                            Label:
+                                text: 'RFID'
+                                size_hint_x: .5
+                            Label:
+                                text: ''
+                                size_hint_x: .2
+                    GridLayout:
+                        pos_hint: {'center_x':0.53, 'top': 1}
+                        size_hint_x: 1
+                        size_hint_y: None
+                        size:
+                        id:list
+                        cols: 1
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
@@ -831,7 +542,6 @@ Manager:
 	            text: "Dalej"
 	            on_release:
                     root.swap()     #fajne przejście
-
 	                app.root.current = "live"
                     root.unswap()   #powrót do normalnego
 	        Button:
@@ -839,9 +549,10 @@ Manager:
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.3,"y":0.15}
 	            size: 130,40
-	            text: root.text3
+	            text: "Nowy kierowca"
                 on_release:
-                    app.root.current = "dodaj"
+                    root.new_textinput()
+
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
@@ -854,8 +565,6 @@ Manager:
 	            pos_hint: {"x":0.51,"y":0.15}
 	            size: 130,40
 	            text: root.text5
-
-
 
 ################################################################################################
 <HistoriaWyscigu>:
@@ -921,7 +630,6 @@ Manager:
 		    Rectangle:
 			    pos: 175,75
 			    size: 930,550
-
 	    FloatLayout:
 	        id: oknoHistoria
 
@@ -936,7 +644,6 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
             StackLayout:
                 id: tabelaHistoria
                 orientation: 'lr-tb'
@@ -950,21 +657,19 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
             Button:
                 size_hint: 0.1, 0.05
                 pos_hint:{"center_x":0.5,"y":0.13}
                 text: root.text2
                 on_release:
                     app.root.current = "poprzednie"
+
 ######################################################
 <Refresh>:
     name: "refresh"
-
     canvas:
         Color:
 	        rgba: hex('#000000')
 	    Rectangle:
 	        pos: self.pos
 	        size: self.size
-

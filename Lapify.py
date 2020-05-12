@@ -1,4 +1,6 @@
 from kivy.config import Config
+from kivy.uix.textinput import TextInput
+
 Config.set('graphics', 'resizable', 0)
 Config.set('graphics', 'width', '1280')
 Config.set('graphics', 'height', '720')
@@ -20,7 +22,6 @@ from kivy.utils import get_color_from_hex
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
 from kivy.uix.button import Button
-
 
 # Żeby móc robić Labele z kolorowym tłem w pliku pythona:
 # Nwm czemu muszą być takie małe wcięcia ale inaczej nie działa XD
@@ -65,12 +66,9 @@ class SelectableButton(RecycleDataViewBehavior, Button):
         self.index = index
         return super(SelectableButton, self).refresh_view_attrs(rv, index, data)
 
-
-
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
-
 
 
 class DatabaseConnecion:
@@ -116,8 +114,8 @@ class DatabaseConnecion:
         all_data = self.cursor.fetchall()
 
         for a in all_data:
-
             wyscig.append((a[0], a[1]))
+
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
@@ -128,10 +126,8 @@ class HistoriaButton(Button):
 
 
 class NowaSesja(Screen):
-
     text1 = "Strona główna"
     text2 = "Rozpocznij nową sesję"
-
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
@@ -149,7 +145,6 @@ class NowaSesja(Screen):
 
         nazwa_wyscigu = str(wyscig[0][0])
         data_wyscigu = str(wyscig[0][1])
-
 
         ekran.add_widget(Label(text=f"{str(nazwa_wyscigu)}",
                                size_hint=(None, None),
@@ -175,16 +170,15 @@ class NowaSesja(Screen):
         all = len(data)
         for i in range(all):
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=f"{licznik + 1}", size=(85, 35)))
+                                         color=get_color_from_hex('ffffff'), text=f"{licznik + 1}", size=(85, 35)))
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=data[licznik][0], size=(160, 35)))
+                                         color=get_color_from_hex('ffffff'), text=data[licznik][0], size=(160, 35)))
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=data[licznik][1], size=(160, 35)))
+                                         color=get_color_from_hex('ffffff'), text=data[licznik][1], size=(160, 35)))
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=data[licznik][2], size=(150, 35)))
+                                         color=get_color_from_hex('ffffff'), text=data[licznik][2], size=(150, 35)))
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text="00:05:23", size=(170, 35)))
-
+                                         color=get_color_from_hex('ffffff'), text="00:05:23", size=(170, 35)))
 
             licznik += 1
 
@@ -236,7 +230,6 @@ class Live(Screen):
 
         sortowane = sorted(dane, key=lambda data: data[4])  # Lista posortowana wg wartosci
 
-
         nazwa_wyscigu = "NAZWA WYŚCIGU"  # Tutaj wrzucić nazwe wyscigu z bazy
 
         bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
@@ -258,15 +251,15 @@ class Live(Screen):
         licznik = 0
         for i in sortowane:
             tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=f"{licznik + 1}", size=(85, 35)))
+                                      color=get_color_from_hex('ffffff'), text=f"{licznik + 1}", size=(85, 35)))
             tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=sortowane[licznik][0], size=(110, 35)))
+                                      color=get_color_from_hex('ffffff'), text=sortowane[licznik][0], size=(110, 35)))
             tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=sortowane[licznik][1], size=(150, 35)))
+                                      color=get_color_from_hex('ffffff'), text=sortowane[licznik][1], size=(150, 35)))
             tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=sortowane[licznik][2], size=(130, 35)))
+                                      color=get_color_from_hex('ffffff'), text=sortowane[licznik][2], size=(130, 35)))
             tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                           color=get_color_from_hex('ffffff'), text=sortowane[licznik][3], size=(170, 35)))
+                                      color=get_color_from_hex('ffffff'), text=sortowane[licznik][3], size=(170, 35)))
 
             tab.add_widget(Button(text="Więcej", size_hint=(None, None), size=(80, 35)))
 
@@ -274,7 +267,6 @@ class Live(Screen):
 
 
 class PoprzednieSesje(Screen):
-
     text1 = "Strona główna"
 
     def __init__(self, **kwargs):
@@ -289,7 +281,6 @@ class PoprzednieSesje(Screen):
                                 database="lapify")
 
         cursor = connection.cursor()
-
 
         cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
         dane = cursor.fetchall()
@@ -322,9 +313,9 @@ class PoprzednieSesje(Screen):
                            size=(157, 35)))
             tab.add_widget(
                 HistoriaButton(text="Więcej",
-                       size_hint=(None, None),
-                       size=(120, 35)
-                       ))
+                               size_hint=(None, None),
+                               size=(120, 35)
+                               ))
             licznik += 1
 
         cursor.close()
@@ -342,8 +333,10 @@ class Pomoc(Screen):
 class TitleBar(Widget):
     pass
 
+
 class TitleBar(Widget):
     pass
+
 
 class HistoriaWyscigu(Screen):
     text1 = "Strona główna"
@@ -362,7 +355,6 @@ class HistoriaWyscigu(Screen):
 
         cursor = connection.cursor()
 
-
         cursor.execute("SELECT k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu\
                         FROM public.kierowca AS k\
                         JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
@@ -376,23 +368,22 @@ class HistoriaWyscigu(Screen):
         kategoria = dane[0][3]
 
         bg.add_widget(Label(text=f"Historia wyścigu {nazwa_wyscigu}",
-                            size_hint=(None,None),
-                            pos_hint={"x":0.45,"y":0.755},
+                            size_hint=(None, None),
+                            pos_hint={"x": 0.45, "y": 0.755},
                             font_size="24",
                             color=get_color_from_hex('#000000')))
 
         bg.add_widget(Label(text=f"Data: {data}",
-                            size_hint=(None,None),
-                            pos_hint={"x":0.27,"y":0.7},
+                            size_hint=(None, None),
+                            pos_hint={"x": 0.27, "y": 0.7},
                             font_size="20",
                             color=get_color_from_hex('#000000')))
 
         bg.add_widget(Label(text=f"Kategoria: {kategoria}",
-                            size_hint=(None,None),
-                            pos_hint={"x":0.55,"y":0.7},
+                            size_hint=(None, None),
+                            pos_hint={"x": 0.55, "y": 0.7},
                             font_size="20",
                             color=get_color_from_hex('#000000')))
-
 
         # Wyświetlanie tytułów tabeli:
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
@@ -404,25 +395,31 @@ class HistoriaWyscigu(Screen):
         licznik = 0
         for i in dane:
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik+1}", color=get_color_from_hex('ffffff'),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
+                           color=get_color_from_hex('ffffff'),
                            size=(85, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=dane[licznik][0], color=get_color_from_hex('ffffff'),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=dane[licznik][0],
+                           color=get_color_from_hex('ffffff'),
                            size=(110, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=dane[licznik][1], color=get_color_from_hex('ffffff'),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=dane[licznik][1],
+                           color=get_color_from_hex('ffffff'),
                            size=(150, 35)))
             tab.add_widget(
                 PoleTabeli(bgcolor=get_color_from_hex('#505050'), text="", color=get_color_from_hex('ffffff'),
                            size=(130, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]), color=get_color_from_hex('ffffff'),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]),
+                           color=get_color_from_hex('ffffff'),
                            size=(170, 35)))
             licznik += 1
 
         cursor.close()
         connection.close()
 
+
+number = 1
 
 
 class Rozpocznij(Screen):
@@ -454,59 +451,29 @@ class Rozpocznij(Screen):
     def unfade(self):
         Manager.transition = NoTransition()
 
-class Refresh(Screen):      # Pusty ekran na który na moment przełączamy się żeby odświeżyć
-    pass
+    def new_textinput(self):
+        global number
+        lp_label = Label(text=str(number), size_hint_x=.2)
+        imie_input = TextInput(multiline=False)
+        nazwisko_input = TextInput(multiline=False)
+        model_input = TextInput(multiline=False)
+        kategoria_input = TextInput(multiline=False)
+        rfid_input = TextInput(multiline=False)
+        empty = Label(text="", size_hint_x=.3)
+        number = number + 1
 
-
-class Manager(ScreenManager):
-    def __init__(self, **kwargs):
-        super(ScreenManager, self).__init__(**kwargs)
-        self.transition = NoTransition()
-
-
-class DodajKierowce(Screen):
-
-    text1 = "Strona główna"
-    text2 = "Dodawanie kierowców"
-    text3 = "Imię"
-
-
-    def add_driver(self):
         grid = self.ids.list
 
+        box_list = BoxLayout(size_hint_y=None, height=30, pos_hint={'top': .5})
+        grid.add_widget(box_list)
 
-        imie = self.ids.name.text
-        nazwisko = self.ids.last_name.text
-        model = self.ids.model.text
-        kategoria = self.ids.category.text
-        rfid = self.ids.tag.text
-
-        list = BoxLayout(size_hint_y=None, height=30, pos_hint={'top': .5})
-        grid.add_widget(list)
-
-
-
-        imie = Label(text=imie, size_hint_x=.2)
-        nazwisko = Label(text=nazwisko, size_hint_x=.2)
-        rfid = Label(text=rfid,size_hint_x=.2)
-
-        model = Label(text=model, size_hint_x=.2)
-        kategoria = Label(text=kategoria, size_hint_x=.2)
-        empty = Label(text="", size_hint_x=.3)
-
-
-
-
-
-        list.add_widget(imie)
-        list.add_widget(nazwisko)
-        list.add_widget(model)
-        list.add_widget(kategoria)
-        list.add_widget(rfid)
-
-        list.add_widget(empty)
-
-
+        box_list.add_widget(lp_label)
+        box_list.add_widget(imie_input)
+        box_list.add_widget(nazwisko_input)
+        box_list.add_widget(model_input)
+        box_list.add_widget(kategoria_input)
+        box_list.add_widget(rfid_input)
+        box_list.add_widget(empty)
 
         connection = db.connect(
             database="lapify",
@@ -527,13 +494,27 @@ class DodajKierowce(Screen):
         print(b)
 
         cursor = connection.cursor()
-        cursor.execute(" INSERT INTO kierowca ( id_kierowcy, imie, nazwisko, model_samochodu, kategoria) VALUES (%s,%s,%s,%s,%s)",
-                       (len(rows) + 1, self.ids.name.text, self.ids.last_name.text,self.ids.model.text,
-                        self.ids.category.text))
+        cursor.execute(
+            " INSERT INTO kierowca ( id_kierowcy, imie, nazwisko, model_samochodu, kategoria) VALUES (%s,%s,%s,%s,%s)",
+            (len(rows) + 1, self.ids.name.text, self.ids.last_name.text, self.ids.model.text,
+             self.ids.category.text))
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
-                       (len(t)+1, b[0], len(rows)+1, self.ids.tag.text))
+                       (len(t) + 1, b[0], len(rows) + 1, self.ids.tag.text))
         connection.commit()
         connection.close()
+
+
+class Refresh(Screen):  # Pusty ekran na który na moment przełączamy się żeby odświeżyć
+    pass
+
+
+class Manager(ScreenManager):
+    def __init__(self, **kwargs):
+        super(ScreenManager, self).__init__(**kwargs)
+        self.transition = NoTransition()
+
+
+
 
 
 kv = Builder.load_file("design.kv")
