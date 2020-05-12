@@ -98,10 +98,11 @@ class DatabaseConnecion:
                        "    on p.id_wyscigu=w.id_wyscigu " \
                        "where w.data_wyscigu=(select max(data_wyscigu) from wyscig)"
         self.cursor.execute(data_command)
-        all = self.cursor.fetchall()
+
+        all_data = self.cursor.fetchall()
 
         licznik = 0
-        for a in all:
+        for a in all_data:
             data.append((a[0], a[1], a[2]))
 
         # pobieranie danych o ostatnim wyscigu
@@ -112,9 +113,10 @@ class DatabaseConnecion:
                         "where data_wyscigu = (select max(data_wyscigu) from wyscig)"
 
         self.cursor.execute(nazwa_wyscigu)
-        all = self.cursor.fetchall()
+        all_data = self.cursor.fetchall()
 
-        for a in all:
+        for a in all_data:
+
             wyscig.append((a[0], a[1]))
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
@@ -126,6 +128,11 @@ class HistoriaButton(Button):
 
 
 class NowaSesja(Screen):
+
+    text1 = "Strona główna"
+    text2 = "Rozpocznij nową sesję"
+
+
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -143,6 +150,7 @@ class NowaSesja(Screen):
         nazwa_wyscigu = str(wyscig[0][0])
         data_wyscigu = str(wyscig[0][1])
 
+
         ekran.add_widget(Label(text=f"{str(nazwa_wyscigu)}",
                                size_hint=(None, None),
                                pos_hint={"x": 0.27, "y": 0.8},
@@ -157,11 +165,11 @@ class NowaSesja(Screen):
 
         # Wyświetlanie tytułów tabeli:
         tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Miejsce", size=(85, 35)))
-        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Imie", size=(160, 35)))
+        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Imię", size=(160, 35)))
         tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Nazwisko", size=(160, 35)))
         tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Model samochodu", size=(150, 35)))
         tabela.add_widget(
-            PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Czas okrazenia", size=(170, 35)))
+            PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Czas okrążenia", size=(170, 35)))
 
         licznik = 0
         all = len(data)
@@ -177,6 +185,7 @@ class NowaSesja(Screen):
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
                            color=get_color_from_hex('ffffff'), text="00:05:23", size=(170, 35)))
 
+
             licznik += 1
 
 
@@ -189,6 +198,8 @@ class WybierzKierowce(Screen):
 
 
 class Live(Screen):
+    text1 = "Strona główna"
+
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -202,7 +213,7 @@ class Live(Screen):
                        ("Robert", "Kubica", f"{czas.text}", "001"),
                        ("Gabrysia", "Delicja", "1:32", "004"),
                        ("Hanna", "Mostowiak", "1:19", "002"),
-                       ("Karolina", "Brzeczyszczykiewicz", "1:37", "003"),
+                       ("Karolina", "Brzęczyszczykiewicz", "1:37", "003"),
                        ("Amadeusz", "Adamczyk", "1:21", "007"),
                        ("Kamil", "Kapucyn", "1:28", "Brak przypisanego RFID"),
                        ("Tomasz", "Karolak", "1:40", "006")]
@@ -225,17 +236,19 @@ class Live(Screen):
 
         sortowane = sorted(dane, key=lambda data: data[4])  # Lista posortowana wg wartosci
 
-        nazwa_wyscigu = "NAZWA WYSCIGU"  # Tutaj wrzucić nazwe wyscigu z bazy
 
-        bg.add_widget(Label(text=f"Wyscig {nazwa_wyscigu}",
+        nazwa_wyscigu = "NAZWA WYŚCIGU"  # Tutaj wrzucić nazwe wyscigu z bazy
+
+        bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.1, "y": 0.85},
+                            pos_hint={"x": 0.15, "y": 0.85},
+
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
         # Wyświetlanie tytułów tabeli:
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imie", size=(110, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(110, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(130, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Status RFID", size=(170, 35)))
@@ -254,11 +267,16 @@ class Live(Screen):
                            color=get_color_from_hex('ffffff'), text=sortowane[licznik][2], size=(130, 35)))
             tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
                            color=get_color_from_hex('ffffff'), text=sortowane[licznik][3], size=(170, 35)))
-            tab.add_widget(Button(text="Wiecej", size_hint=(None, None), size=(80, 35)))
+
+            tab.add_widget(Button(text="Więcej", size_hint=(None, None), size=(80, 35)))
+
             licznik += 1
 
 
 class PoprzednieSesje(Screen):
+
+    text1 = "Strona główna"
+
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -272,19 +290,20 @@ class PoprzednieSesje(Screen):
 
         cursor = connection.cursor()
 
+
         cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
         dane = cursor.fetchall()
 
-        bg.add_widget(Label(text=f"Historia wyscigow: ",
+        bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
                             pos_hint={"x": 0.09, "y": 0.84},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
         # Wyświetlanie tytułów tabeli:
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Numer wyscigu", size=(150, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwa wyscigu", size=(300, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Data wyscigu", size=(157, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Numer wyścigu", size=(150, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwa wyścigu", size=(300, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Data wyścigu", size=(157, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(120, 35)))
 
         licznik = 0
@@ -302,7 +321,7 @@ class PoprzednieSesje(Screen):
                            color=get_color_from_hex('ffffff'),
                            size=(157, 35)))
             tab.add_widget(
-                HistoriaButton(text="Wiecej",
+                HistoriaButton(text="Więcej",
                        size_hint=(None, None),
                        size=(120, 35)
                        ))
@@ -313,13 +332,23 @@ class PoprzednieSesje(Screen):
 
 
 class Pomoc(Screen):
-    pass
+    text1 = "Strona główna"
+    text2 = "W przypadku problemów z aplikacją \n                 prosimy o kontakt:"
+    text3 = "Aleksandra Chudzińska"
+    text4 = "Mikołaj Stojek"
+    text5 = "Anna Zięba"
 
 
 class TitleBar(Widget):
     pass
 
+class TitleBar(Widget):
+    pass
+
 class HistoriaWyscigu(Screen):
+    text1 = "Strona główna"
+    text2 = 'Wróć'
+
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -346,7 +375,7 @@ class HistoriaWyscigu(Screen):
         data = dane[0][4]
         kategoria = dane[0][3]
 
-        bg.add_widget(Label(text=f"Historia wyscigu {nazwa_wyscigu}",
+        bg.add_widget(Label(text=f"Historia wyścigu {nazwa_wyscigu}",
                             size_hint=(None,None),
                             pos_hint={"x":0.45,"y":0.755},
                             font_size="24",
@@ -367,7 +396,7 @@ class HistoriaWyscigu(Screen):
 
         # Wyświetlanie tytułów tabeli:
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imie", size=(110, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(110, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(130, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Data", size=(170, 35)))
@@ -397,6 +426,12 @@ class HistoriaWyscigu(Screen):
 
 
 class Rozpocznij(Screen):
+    text1 = "Strona główna"
+    text2 = "Nazwa wyścigu:"
+    text3 = "Dodaj kierowcę"
+    text4 = "Usuń kierowcę"
+    text5 = "Edytuj kierowcę"
+
     def swap(self):
         Manager.transition = SwapTransition()
 
@@ -430,6 +465,12 @@ class Manager(ScreenManager):
 
 
 class DodajKierowce(Screen):
+
+    text1 = "Strona główna"
+    text2 = "Dodawanie kierowców"
+    text3 = "Imię"
+
+
     def add_driver(self):
         grid = self.ids.list
 

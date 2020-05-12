@@ -61,7 +61,7 @@ Manager:
 
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: "Strona glowna"
+            text: root.text1
             on_release:
                 app.root.current = "nowa"
         ImageButton:
@@ -94,7 +94,7 @@ Manager:
                 background_color: hex('#FFFFFF')
                 pos_hint:{"x":0.68,"top":0.55}
                 size_hint: 0.22, 0.1
-                text: "Rozpocznij nowa sesje"
+                text: root.text2
                 on_release:
                     root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
                     app.root.current = "rozpocznij"
@@ -176,7 +176,7 @@ Manager:
 			    size: self.width, 40
 
         ImageButton:
-            text: "Strona glowna"
+            text: root.text1
             on_release:
                 app.root.current = "nowa"
         ImageButton:
@@ -271,7 +271,7 @@ Manager:
 			    size: self.width, 40
 
         ImageButton:
-            text: "Strona glowna"
+            text: root.text1
             on_release:
                 app.root.current = "nowa"
         ImageButton:
@@ -362,7 +362,7 @@ Manager:
 			    size: self.width, 40
 
         ImageButton:
-            text: "Strona glowna"
+            text: root.text1
             on_release:
                 app.root.current = "nowa"
         ImageButton:
@@ -386,7 +386,9 @@ Manager:
                 Label:
                     size_hint_y: .2
                 OrangeLabel:
-                    text: "W przypadku problemow z aplikacja \n                 prosimy o kontakt:"
+
+                    text: root.text2
+
                     size_hint_y: .2
                 OrangeLabel:
                     size_hint_y: .3
@@ -415,7 +417,9 @@ Manager:
                     text: "Autorzy: "
                     size_hint_y: .1
                 OrangeLabel:
-                    text: "Aleksandra Chudzinska"
+
+                    text: root.text3
+
                     size_hint_y: .1
                 OrangeLabel:
                     text: "Piotr Janicki"
@@ -424,10 +428,12 @@ Manager:
                     text: "Aleksandra Kaczmarska"
                     size_hint_y: .1
                 OrangeLabel:
-                    text: "Mikolaj Stojek"
+
+                    text: root.text4
                     size_hint_y: .1
                 OrangeLabel:
-                    text: "Anna Zieba"
+                    text: root.text5
+
                     size_hint_y: .1
                 Label:
 
@@ -467,7 +473,9 @@ Manager:
                 size: self.width, 40
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: "Strona glowna"
+
+            text: root.text1
+
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -497,7 +505,9 @@ Manager:
 	        	size_hint: (None,None)
 	            pos_hint: {"x":0.23,"y":0.76}
 	            font_size: '24'
-	            text: "Dodawanie kierowcow"
+
+	            text: root.text2
+
 	            color: hex('#000000')
             BoxLayout:
                 orientation: 'horizontal'
@@ -519,7 +529,9 @@ Manager:
                             height: 50
 
                             Label:
-                                text: 'Imie'
+
+                                text: root.text3
+
                                 size_hint_x: .4
                             Label:
                                 text: 'Nazwisko'
@@ -624,7 +636,7 @@ Manager:
                 size: self.width, 40
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: "Strona glowna"
+            text: root.text1
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -659,7 +671,7 @@ Manager:
 	        	size_hint: (None,None)
 	            pos_hint: {"x":0.18,"y":0.69}
 	            font_size: '18'
-	            text: "Nazwa wyscigu:"
+	            text: root.text2
 	            color: hex('#000000')
 	        Button:
 	            background_color: hex('#FFFFFF')
@@ -827,7 +839,7 @@ Manager:
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.3,"y":0.15}
 	            size: 130,40
-	            text: "Dodaj kierowce"
+	            text: root.text3
                 on_release:
                     app.root.current = "dodaj"
 	        Button:
@@ -835,13 +847,14 @@ Manager:
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.405,"y":0.15}
 	            size: 130,40
-	            text: "Usun kierowce"
+	            text: root.text4
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.51,"y":0.15}
 	            size: 130,40
-	            text: "Edytuj kierowce"
+	            text: root.text5
+
 
 
 ################################################################################################
@@ -884,7 +897,7 @@ Manager:
                 size: self.width, 40
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: "Strona glowna"
+            text: root.text1
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -941,7 +954,7 @@ Manager:
             Button:
                 size_hint: 0.1, 0.05
                 pos_hint:{"center_x":0.5,"y":0.13}
-                text: 'Wroc'
+                text: root.text2
                 on_release:
                     app.root.current = "poprzednie"
 ######################################################
