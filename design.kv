@@ -239,8 +239,8 @@ Manager:
 ######################################################
 <Live>:
     name: "live"
-    on_pre_enter: tabelaLive.clear_widgets()    # Czyścimy tabele
-    on_enter: root.generuj()    # Wyświetlamy zaktualizowaną
+    on_pre_enter: root.generuj()    # Wyświetlamy zaktualizowaną
+    on_pre_leave: tabelaLive.clear_widgets()    # Czyścimy tabele
 
     canvas:
         Color:
@@ -294,11 +294,11 @@ Manager:
             TextInput:
                 id: czas
                 multiline: False
-                pos_hint: {"x":0.75,"y":0.6}
+                pos_hint: {"x":0.84,"y":0.6}
                 size_hint: (None,None)
                 size: (100,50)
             Button:
-                pos_hint:{"x":0.75,"y":0.5}
+                pos_hint:{"x":0.84,"y":0.5}
                 size_hint: (None,None)
                 size: (100,50)
                 text: "REFRESH"
@@ -309,8 +309,8 @@ Manager:
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
-                size: (734,504.5)
-                pos_hint:{"x":0.0185,"y":0.167}
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
                 canvas:
                     Color:
                         rgba: hex('#404040')
@@ -323,8 +323,8 @@ Manager:
                 orientation: 'lr-tb'
                 spacing: [1,1]
                 size_hint: (None,None)
-                size: (730,500)
-                pos_hint:{"x":0.02,"y":0.17}
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
                 canvas:
                     Color:
                         rgba: hex('#606060')
@@ -374,6 +374,7 @@ Manager:
             on_release:
                 app.root.current = "poprzednie"
         ImageButton:
+            background_normal: 'graphics/pressed.png'
             text: "Pomoc"
             on_release:
                 app.root.current = "pomocy"
@@ -860,9 +861,13 @@ Manager:
 ################################################################################################
 <HistoriaWyscigu>:
     name:"historia"
-    on_enter:
-        tabelaHistoria.clear_widgets()    # Czyścimy tabele
+
+    on_pre_enter:
         root.generuj()    # Wyświetlamy zaktualizowaną
+
+    on_leave:
+        oknoHistoria.clear_widgets()    # Czyścimy okno
+        tabelaHistoria.clear_widgets()    # Czyścimy tabele
 
     canvas.before:
         Color:
@@ -923,13 +928,14 @@ Manager:
 			    size: 930,550
 
 	    FloatLayout:
-	        id: oknoHistoria
+	        FloatLayout:
+	            id: oknoHistoria
 
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
-                size: (654,394.5)
-                pos_hint:{"x":0.2382,"y":0.1965}
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
                 canvas:
                     Color:
                         rgba: hex('#606060')
@@ -942,8 +948,8 @@ Manager:
                 orientation: 'lr-tb'
                 spacing: [1,1]
                 size_hint: (None,None)
-                size: (650,390)
-                pos_hint:{"x":0.24,"y":0.2}
+                size: (770,390)
+                pos_hint:{"x":0.2,"y":0.2}
                 canvas:
                     Color:
                         rgba: hex('#707070')
