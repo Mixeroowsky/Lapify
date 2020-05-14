@@ -516,7 +516,7 @@ Manager:
                                 size_hint_x: .5
                             Label:
                                 text: ''
-                                size_hint_x: .2
+                                size_hint_x: .4
                     GridLayout:
                         pos_hint: {'center_x':0.53, 'top': 1}
                         size_hint_x: 1
@@ -551,8 +551,7 @@ Manager:
 	            size: 130,40
 	            text: "Nowy kierowca"
                 on_release:
-                    root.new_textinput()
-
+                    root.new_text_input()
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
@@ -565,6 +564,7 @@ Manager:
 	            pos_hint: {"x":0.51,"y":0.15}
 	            size: 130,40
 	            text: root.text5
+	            on_release: root.delete_driver()
 
 ################################################################################################
 <HistoriaWyscigu>:

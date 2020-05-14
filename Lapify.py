@@ -268,7 +268,6 @@ class Live(Screen):
 
 class PoprzednieSesje(Screen):
     text1 = "Strona główna"
-
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -419,7 +418,7 @@ class HistoriaWyscigu(Screen):
         connection.close()
 
 
-number = 1
+number_of_drivers = 1
 
 
 class Rozpocznij(Screen):
@@ -428,6 +427,9 @@ class Rozpocznij(Screen):
     text3 = "Dodaj kierowcę"
     text4 = "Usuń kierowcę"
     text5 = "Edytuj kierowcę"
+
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
 
     def swap(self):
         Manager.transition = SwapTransition()
@@ -451,18 +453,21 @@ class Rozpocznij(Screen):
     def unfade(self):
         Manager.transition = NoTransition()
 
-    def new_textinput(self):
-        global number
-        lp_label = Label(text=str(number), size_hint_x=.2)
+    def new_text_input(self):
+        global number_of_drivers
+        lp_label = Label(text=str(number_of_drivers), size_hint_x=.2)
         imie_input = TextInput(multiline=False)
         nazwisko_input = TextInput(multiline=False)
         model_input = TextInput(multiline=False)
         kategoria_input = TextInput(multiline=False)
         rfid_input = TextInput(multiline=False)
         empty = Label(text="", size_hint_x=.3)
-        number = number + 1
+        button = Button(text="Dodaj",size_hint_x=.6)
+        number_of_drivers = number_of_drivers + 1
 
         grid = self.ids.list
+
+        button.bind(on_press= self.move_to_live)
 
         box_list = BoxLayout(size_hint_y=None, height=30, pos_hint={'top': .5})
         grid.add_widget(box_list)
@@ -473,8 +478,10 @@ class Rozpocznij(Screen):
         box_list.add_widget(model_input)
         box_list.add_widget(kategoria_input)
         box_list.add_widget(rfid_input)
+        box_list.add_widget(button)
         box_list.add_widget(empty)
 
+    def move_to_live(self,arg):
         connection = db.connect(
             database="lapify",
             user="postgres",
@@ -491,18 +498,10 @@ class Rozpocznij(Screen):
         cursor = connection.cursor()
         cursor.execute("SELECT id_wyscigu FROM wyscig WHERE data_wyscigu = (select max(data_wyscigu) from wyscig) ")
         b = cursor.fetchall()
-        print(b)
+        print(rows)
 
-        cursor = connection.cursor()
-        cursor.execute(
-            " INSERT INTO kierowca ( id_kierowcy, imie, nazwisko, model_samochodu, kategoria) VALUES (%s,%s,%s,%s,%s)",
-            (len(rows) + 1, self.ids.name.text, self.ids.last_name.text, self.ids.model.text,
-             self.ids.category.text))
-        cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
-                       (len(t) + 1, b[0], len(rows) + 1, self.ids.tag.text))
-        connection.commit()
-        connection.close()
-
+    def delete_driver(self):
+        self.remove_widget()
 
 class Refresh(Screen):  # Pusty ekran na który na moment przełączamy się żeby odświeżyć
     pass
@@ -512,8 +511,6 @@ class Manager(ScreenManager):
     def __init__(self, **kwargs):
         super(ScreenManager, self).__init__(**kwargs)
         self.transition = NoTransition()
-
-
 
 
 
