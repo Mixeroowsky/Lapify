@@ -15,7 +15,7 @@ Manager:
     PoprzednieSesje:
     HistoriaWyscigu:
     Pomoc:
-    Refresh:
+    PolaczRFID:
 
 ################################################################################################
 <OrangeLabel@Label>
@@ -279,6 +279,13 @@ Manager:
                 root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
                 app.root.current = "dodaj"
                 root.unfade()
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.4}
+            size_hint: 0.15, 0.1
+            text: "Polacz RFID"
+            on_release:
+                app.root.current = "polaczRFID"
 
 
     StackLayout:
@@ -976,12 +983,114 @@ Manager:
                 on_release:
                     app.root.current = "poprzednie"
 ######################################################
-<Refresh>:
-    name: "refresh"
+<PolaczRFID>:
+    name: "polaczRFID"
+    on_pre_enter:
+        root.generuj()    # Wyświetlamy zaktualizowaną
 
-    canvas:
+    on_leave:
+        tabelaRFID.clear_widgets()    # Czyścimy tabele
+
+    canvas.before:
         Color:
-	        rgba: hex('#000000')
+	        rgba: hex('#6F696D')
 	    Rectangle:
 	        pos: self.pos
 	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Strona Glowna"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: oknoHistoria
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaRFID
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (770,390)
+                pos_hint:{"x":0.2,"y":0.2}
+                canvas:
+                    Color:
+                        rgba: hex('#707070')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            Label:
+	        	size_hint: (None,None)
+	            pos_hint:{"x":0.45,"y":0.755}
+	            font_size: '30'
+	            text: "Parowanie RFID"
+	            color: hex('#EF8B00')
+            Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.7,"y":0.12}
+	            size: 110,40
+	            text: "Wroc"
+	            on_release:
+	                app.root.current = "live"
