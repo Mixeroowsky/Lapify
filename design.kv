@@ -10,14 +10,12 @@ Manager:
     Bramki:
     Rozpocznij:
     NowyKierowca:
-    WybierzKierowce:
     DodajKierowce:
     Live:
     PoprzednieSesje:
     HistoriaWyscigu:
     Pomoc:
     Refresh:
-
 
 ################################################################################################
 <OrangeLabel@Label>
@@ -246,18 +244,6 @@ Manager:
                         pos: self.pos
                         size: self.size
 
-    #FloatLayout:    #okienko
-	 #   canvas:
-	#	    Color:
-	#		    rgba: hex('#808080')
-	#	    Rectangle:
-	#		    pos: root.width-self.width+20,root.height-650
-	#		    size: 930,550
-	 #   Label:
-      #      text: 'Historia wyscigow:'
-       #     color: hex('#EF8B00')
-         #   pos: -490,290
-        #    font_size: '30'
 
 ######################################################
 <Live>:
@@ -284,6 +270,17 @@ Manager:
             size_hint: None, None
             pos: root.width-self.width+20,root.height-230
             size:250,250
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.55}
+            size_hint: 0.15, 0.1
+            text: root.text2
+            on_release:
+                root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
+                app.root.current = "dodaj"
+                root.unfade()
+
+
     StackLayout:
 	    canvas:
 		    Color:
@@ -314,20 +311,6 @@ Manager:
         FloatLayout:
             id: plansza
 
-            TextInput:
-                id: czas
-                multiline: False
-                pos_hint: {"x":0.84,"y":0.6}
-                size_hint: (None,None)
-                size: (100,50)
-            Button:
-                pos_hint:{"x":0.84,"y":0.5}
-                size_hint: (None,None)
-                size: (100,50)
-                text: "REFRESH"
-                on_release:
-                    app.root.current = "refresh"
-                    app.root.current = "live"
 
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
@@ -462,6 +445,8 @@ Manager:
                 Label:
 
 ######################################################
+
+######################################################
 <DodajKierowce>:
     name: "dodaj"
     canvas.before:
@@ -495,11 +480,10 @@ Manager:
                 source: 'graphics/pressed.png'
                 pos: 0, self.height-40
                 size: self.width, 40
+
         ImageButton:
             background_normal: 'graphics/pressed.png'
-
             text: root.text1
-
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -509,6 +493,7 @@ Manager:
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Pomoc"
+
     FloatLayout:    #czarna ramka wokół okienka
 	    canvas:
 		    Color:
@@ -516,6 +501,7 @@ Manager:
 		    Rectangle:
 			    pos: 173,73
 			    size: 934,554
+
     FloatLayout:    #okienko
 	    canvas:
 		    Color:
@@ -527,61 +513,57 @@ Manager:
 	    FloatLayout:
 	        Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.23,"y":0.76}
+	            pos_hint: {"x":0.43,"y":0.76}
 	            font_size: '24'
-
 	            text: root.text2
 
-	            color: hex('#000000')
+
             BoxLayout:
                 orientation: 'horizontal'
-                size_hint: (0.65, 0.5) #rozmiar ciemnoszarego tla
-                pos_hint:{"x":0.17,"y":0.2}
+                size_hint: (0.6, 0.5) #rozmiar ciemnoszarego tla
+                pos_hint:{"x":0.2,"y":0.2}
                 canvas:
                     Color:
                         rgba: hex('#404040')
                     Rectangle:
                         pos: self.pos
                         size: self.size
+
                 FloatLayout:
                     BoxLayout:
                         orientation: 'vertical'
-                        size_hint_x: .8
-                        pos_hint: {"center_x":.5,'y': 1} #pozycja labelow i inputow
+                        size_hint_x: .9
+                        pos_hint: {"center_x":.4,'y': 1} #pozycja labelow i inputow
                         BoxLayout:
                             size_hint_y: None
                             height: 50
 
                             Label:
-
                                 text: root.text3
-
                                 size_hint_x: .4
+
                             Label:
                                 text: 'Nazwisko'
-                                size_hint_x: .4
+                                size_hint_x: .3
 
                             Label:
                                 text: 'Model'
-                                size_hint_x: .4
+                                size_hint_x: .3
+
                             Label:
                                 text: 'Kategoria'
-                                size_hint_x: .4
-                            Label:
-                                text: 'RFID'
-                                size_hint_x: .4
-
-
-
+                                size_hint_x: .3
                             Label:
                                 text: ''
-                                size_hint_x: .2
+                                size_hint_x: .3
                         BoxLayout:
                             id: input
                             size_hint_y: None
                             pos_hint_x: 1
-                            height: 30
-
+                            height: 40
+                            Label:
+                                text: ''
+                                size_hint_x: .09
                             TextInput:
                                 id: name
                                 multiline: False
@@ -599,29 +581,42 @@ Manager:
                                 id: category
                                 multiline: False
                                 size_hint_x: .3
-                            TextInput:
-                                id: tag
-                                multiline: False
-                                size_hint_x: .3
 
                             Button:
                                 id:add
                                 text: 'Dodaj'
-                                on_release: root.add_driver()
+                                color: hex('#E27814')
+                                on_release:
+                                    root.add_driver()
+                                    root.clear_inputs([name, last_name, model, category])
                                 size_hint_x: .2
                     GridLayout:
-                        pos_hint: {'center_x':0.55, 'top': 1}
+                        pos_hint: {'center_x':0.47, 'top': 1}
                         size_hint_x: 1
                         size_hint_y: None
                         size:
                         id:list
                         cols: 1
             Button:
-                size_hint: 0.1, 0.05
-                pos_hint:{"center_x":0.5,"y":0.13}
+                background_color: hex('#FFFFFF')
+                size_hint: (None,None)
+                pos_hint:{"center_x":0.8,"y":0.13}
+                size: 110,40
                 text: 'Ok'
+                color: hex('#E27814')
                 on_release:
+                    app.root.current = "live"
+            Button:
+                background_color: hex('#FFFFFF')
+                size_hint: (None,None)
+                pos_hint: {"x":0.15,"y":0.12}
+                size: 110,40
+                text: "Cofnij"
+                color: hex('#E27814')
+                on_release:
+                    root.fade()
                     app.root.current = "rozpocznij"
+                    root.unfade()
 ######################################################
 <Bramki>:
     name: "bramki"
@@ -806,174 +801,61 @@ Manager:
 		    Color:
 			    rgba: hex('#000000')
 		    Rectangle:
-			    pos: 173,73
-			    size: 934,554
+			    pos: 350,178
+			    size: 504,344
     FloatLayout:    #okienko
 	    canvas:
 		    Color:
 			    rgba: hex('#808080')
 		    Rectangle:
-			    pos: 175,75
-			    size: 930,550
+			    pos: 352,180
+			    size: 500,340
 	    FloatLayout:
 	        Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.18,"y":0.76}
+	            pos_hint: {"x":0.43,"y":0.63}
 	            font_size: '24'
 	            text: "Nowa sesja"
-	            color: hex('#000000')
+
 	        Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.18,"y":0.69}
-	            font_size: '18'
+	            pos_hint: {"x":0.3,"y":0.56}
+	            font_size: '19'
 	            text: root.text2
-	            color: hex('#000000')
-	        Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
-	            pos_hint: {"x":0.56,"y":0.732}
-	            size: 40,40
-	            text: "OK"
-	            on_release: root.input()
+
 	        TextInput:
 	            id: wyscig
 	            size_hint: (None,None)
-	            size: 300,36
+	            size: 250,36
 	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.732}
+	            pos_hint: {"x":0.4,"y":0.60}
 	            multiline: False
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint: (None,None)
-                size: (570,320)
-                pos_hint:{"x":0.17,"y":0.25}
-                canvas:
-                    Color:
-                        rgba: hex('#404040')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint: (None,None)
-                    size: (190,320)
-                    canvas:
-                        Color:
-                            rgba: hex('#404040')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        text: "ID Kierowcy"
-                        canvas.before:
-                            Color:
-                                rgba: hex('#303030')
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
-                    Label:
-                        text: "01"
-                    Label:
-                        text: "02"
-                    Label:
-                        text: "03"
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint: (None,None)
-                    size: (190,320)
-                    canvas:
-                        Color:
-                            rgba: hex('#404040')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        text: "Imie"
-                        canvas.before:
-                            Color:
-                                rgba: hex('#303030')
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
-                    Label:
-                        text: "Andrzej"
-                    Label:
-                        text: "Monika"
-                    Label:
-                        text: "Krystian"
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                BoxLayout:
-                    orientation: 'vertical'
-                    size_hint: (None,None)
-                    size: (190,320)
-                    canvas:
-                        Color:
-                            rgba: hex('#404040')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-                    Label:
-                        text: "Nazwisko"
-                        canvas.before:
-                            Color:
-                                rgba: hex('#303030')
-                            Rectangle:
-                                size: self.size
-                                pos: self.pos
-                    Label:
-                        text: "Motyka"
-                    Label:
-                        text: "Kielbasa"
-                    Label:
-                        text: "Nowak"
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
-                    Label:
-                        text: ""
+	        Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.6,"y":0.59}
+	            size: 50,50
+	            text: "OK"
+	            color: hex('#E27814')
+                on_release:
+                    root.input()
+            Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.409,"y":0.4}
+	            size: 200,80
+	            text: root.text3
+	            color: hex('#E27814')
+                on_release:
+                    app.root.current = "dodaj"
 
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            pos_hint: {"x":0.18,"y":0.15}
+	            pos_hint: {"x":0.3,"y":0.27}
 	            size: 110,40
 	            text: "Cofnij"
+	            color: hex('#E27814')
 	            on_release:
 	                root.fade()
 	                app.root.current = "nowa"
@@ -981,44 +863,20 @@ Manager:
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            pos_hint: {"x":0.7,"y":0.15}
+	            pos_hint: {"x":0.56,"y":0.27}
 	            size: 110,40
 	            text: "Dalej"
+	            color: hex('#E27814')
 	            on_release:
                     root.swap()     #fajne przejście
-
-	                app.root.current = "live"
+                    app.root.current = "live"
                     root.unswap()   #powrót do normalnego
-	        Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
-	            pos_hint: {"x":0.3,"y":0.15}
-	            size: 130,40
-	            text: root.text3
-                on_release:
-                    app.root.current = "dodaj"
-	        Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
-	            pos_hint: {"x":0.405,"y":0.15}
-	            size: 130,40
-	            text: root.text4
-	        Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
-	            pos_hint: {"x":0.51,"y":0.15}
-	            size: 130,40
-	            text: root.text5
-
-
 
 ################################################################################################
 <HistoriaWyscigu>:
     name:"historia"
-
     on_pre_enter:
         root.generuj()    # Wyświetlamy zaktualizowaną
-
     on_leave:
         oknoHistoria.clear_widgets()    # Czyścimy okno
         tabelaHistoria.clear_widgets()    # Czyścimy tabele
