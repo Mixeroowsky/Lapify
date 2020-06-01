@@ -47,7 +47,7 @@ Builder.load_string("""
     app.root.current = "historia"
 """)
 
-number = 0
+#number = 0
 dane = []  # Przyda sie potem
 okrazenie = []
 wyscig = []
