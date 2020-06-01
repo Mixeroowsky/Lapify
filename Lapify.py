@@ -21,6 +21,7 @@ from kivy.utils import get_color_from_hex
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
 from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 
 
@@ -48,6 +49,7 @@ Builder.load_string("""
 """)
 
 number = 0
+number_update = 0
 dane = []  # Przyda sie potem
 okrazenie = []
 wyscig = []
@@ -58,6 +60,10 @@ connection = db.connect(database="lapify", user="postgres", password="postgres")
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
+
+
+class PolaczButton(Button):
+    id = ObjectProperty(None)
 
 
 class HistoriaButton(Button):
@@ -587,8 +593,91 @@ class Rozpocznij(Screen):
     def unfade(self):
         Manager.transition = NoTransition()
 
-class Refresh(Screen):      # Pusty ekran na który na moment przełączamy się żeby odświeżyć
-    pass
+text_input = []
+text_id = []
+
+class PolaczRFID(Screen):      # Pusty ekran na który na moment przełączamy się żeby odświeżyć
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
+
+    def generuj(self):
+        tab = self.ids.tabelaRFID
+
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,  p.rfid\
+                                  FROM public.kierowca AS k\
+                                  LEFT JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
+                                  JOIN public.przejazd AS r ON p.id_przypisania = r.id_przypisania")
+
+        daner = cursor.fetchall()
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="ID", size=(85, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(110, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Model samochodu", size=(170, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="RFID", size=(120, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(130, 35)))
+        licznik = 0
+        global text_input
+        for i in daner:
+            text_id.append(daner[licznik][0])
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(daner[licznik][0]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(85, 35)))
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(daner[licznik][1]),
+                                      color=get_color_from_hex('ffffff'),
+                                      size=(110, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(daner[licznik][2]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(150, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(daner[licznik][3]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(170, 35)))
+            text_input.append(TextInput(size_hint=(None, None), size=(120, 35)))
+            tab.add_widget(text_input[licznik])
+            tab.add_widget(
+                PolaczButton(id=licznik, text="Polacz", size_hint=(None, None), size=(130, 35),
+                             on_release=lambda x: self.update()))
+
+            licznik += 1
+
+    def update(self):
+        global text_input
+        global text_id
+        global number
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+
+        text = text_input[number].text
+
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_przypisania, id_wyscigu, id_kierowcy, rfid FROM przypisanie ")
+        t = cursor.fetchall()
+
+        cursor = connection.cursor()
+        cursor.execute("select id_wyscigu " \
+                       "from wyscig " \
+                       "where data_wyscigu = (select max(data_wyscigu) from wyscig)")
+
+        b = cursor.fetchall()
+        print(b)
+
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
+                       (len(t) + 1, b[0], text_id[number], text))
+        # cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
+        print(text)
+        cursor.close()
+        connection.commit()
+        connection.close()
 
 
 class Manager(ScreenManager):
