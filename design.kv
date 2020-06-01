@@ -3,6 +3,7 @@
 #:import hex kivy.utils.get_color_from_hex
 #:import utils kivy.utils
 #:import Factory kivy.factory.Factory
+
 Manager:
 	transition: NoTransition()
 	Startowa:
@@ -13,11 +14,11 @@ Manager:
     WybierzKierowce:
     DodajKierowce:
     Live:
+    WynikiKierowcy:
+    SzczegolyOkrazenia:
     PoprzednieSesje:
     HistoriaWyscigu:
     Pomoc:
-    Refresh:
-
 
 ################################################################################################
 <OrangeLabel@Label>
@@ -246,24 +247,14 @@ Manager:
                         pos: self.pos
                         size: self.size
 
-    #FloatLayout:    #okienko
-	 #   canvas:
-	#	    Color:
-	#		    rgba: hex('#808080')
-	#	    Rectangle:
-	#		    pos: root.width-self.width+20,root.height-650
-	#		    size: 930,550
-	 #   Label:
-      #      text: 'Historia wyscigow:'
-       #     color: hex('#EF8B00')
-         #   pos: -490,290
-        #    font_size: '30'
 
 ######################################################
 <Live>:
     name: "live"
     on_pre_enter: root.generuj()    # Wyświetlamy zaktualizowaną
-    on_pre_leave: tabelaLive.clear_widgets()    # Czyścimy tabele
+    on_leave:
+        tabelaLive.clear_widgets()    # Czyścimy tabele
+        plansza.clear_widgets()
 
     canvas:
         Color:
@@ -314,21 +305,6 @@ Manager:
         FloatLayout:
             id: plansza
 
-            TextInput:
-                id: czas
-                multiline: False
-                pos_hint: {"x":0.84,"y":0.6}
-                size_hint: (None,None)
-                size: (100,50)
-            Button:
-                pos_hint:{"x":0.84,"y":0.5}
-                size_hint: (None,None)
-                size: (100,50)
-                text: "REFRESH"
-                on_release:
-                    app.root.current = "refresh"
-                    app.root.current = "live"
-
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
@@ -354,6 +330,194 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
+
+######################################################
+<WynikiKierowcy>:
+    name: "kierowca"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaKierowca.clear_widgets()
+        planszaKierowca.clear_widgets()
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: planszaKierowca
+
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaKierowca
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                pos_hint:{"x":0.84,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: root.text2
+                on_release:
+                    app.root.current = "live"
+
+######################################################
+<SzczegolyOkrazenia>:
+    name: "okrazenie"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaOkrazenia.clear_widgets()
+        planszaOkrazenia.clear_widgets()
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: planszaOkrazenia
+
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaOkrazenia
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                pos_hint:{"x":0.84,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: root.text2
+                on_release:
+                    app.root.current = "kierowca"
 
 ######################################################
 <Pomoc>:
@@ -1117,13 +1281,3 @@ Manager:
                 text: root.text2
                 on_release:
                     app.root.current = "poprzednie"
-######################################################
-<Refresh>:
-    name: "refresh"
-
-    canvas:
-        Color:
-	        rgba: hex('#000000')
-	    Rectangle:
-	        pos: self.pos
-	        size: self.size
