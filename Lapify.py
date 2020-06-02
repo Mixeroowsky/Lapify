@@ -639,15 +639,15 @@ class HistoriaWyscigu(Screen):
         nazwa_wyscigu = dane[0][5]
         data = dane[0][4]
 
-        bg.add_widget(Label(text=f"Historia wyścigu {nazwa_wyscigu}",
+        bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.45, "y": 0.755},
-                            font_size="24",
-                            color=get_color_from_hex('#000000')))
+                            pos_hint={"x": 0.09, "y": 0.85},
+                            font_size="30",
+                            color=get_color_from_hex('#EF8B00')))
 
         bg.add_widget(Label(text=f"Data: {data}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.24, "y": 0.7},
+                            pos_hint={"x": 0.24, "y": 0.8},
                             font_size="20",
                             color=get_color_from_hex('#000000')))
 
