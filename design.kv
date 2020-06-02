@@ -224,28 +224,35 @@ Manager:
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
-                size: (734,504.5)
-                pos_hint:{"x":0.0185,"y":0.167}
+                size: (734,639)
+                pos_hint:{"x":0,"y":0}
                 canvas:
                     Color:
                         rgba: hex('#404040')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:      # Tabela
-                id: tabelaPoprzednie
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (730,500)
-                pos_hint:{"x":0.02,"y":0.17}
-                canvas:
-                    Color:
-                        rgba: hex('#606060')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+            ScrollView:
+                size_hint:(0.59,.88)
+                do_scroll_x: False
+                do_scroll_y: True
+                bar_width: 20
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelaPoprzednie
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (730,1000)
+                    pos_hint:{"x":0.02,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
 
 ######################################################
