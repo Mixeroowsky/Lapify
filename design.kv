@@ -822,6 +822,8 @@ Manager:
 ######################################################
 <Bramki>:
     name: "bramki"
+    on_enter:
+        root.generuj()
     canvas.before:
         Color:
 	        rgba: hex('#6F696D')
@@ -886,51 +888,45 @@ Manager:
 	            font_size: '24'
 	            text: "Konfiguracja bramek czasowych"
 	            color: hex('#000000')
-	        Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.165,"y":0.69}
-	            font_size: '18'
-	            text: "Bramka Start:"
-	            color: hex('#000000')
-
-	        TextInput:
-	            id: start
+	    FloatLayout:
+	        id: oknobramki
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (864,424.5)
+                pos_hint:{"x":0.15,"y":0.215}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            StackLayout:      # Tabela
+                id: tabelabramki
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (862,423)
+                pos_hint:{"x":0.1507,"y":0.216}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (860,420)
+                pos_hint:{"x":0.153,"y":0.175}
+                id: tag_id
+            Button:
+                text: "Odswiez"
+                background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            size: 300,36
-	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.732}
-	            multiline: False
-
-	        Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.18,"y":0.61}
-	            font_size: '18'
-	            text: "Bramka Srodkowa:"
-	            color: hex('#000000')
-
-	        TextInput:
-	            id: srodek
-	            size_hint: (None,None)
-	            size: 300,36
-	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.65}
-	            multiline: False
-
-            Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.165,"y":0.53}
-	            font_size: '18'
-	            text: "Bramka Meta:"
-	            color: hex('#000000')
-
-	        TextInput:
-	            id: meta
-	            size_hint: (None,None)
-	            size: 300,36
-	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.568}
-	            multiline: False
-
+	            pos_hint: {"x":0.6,"y":0.15}
+	            size: 110,40
+                on_release: root.add_tag_id()
             Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
@@ -938,9 +934,7 @@ Manager:
 	            size: 110,40
 	            text: "Zatwierdz"
 	            on_release:
-                    root.input()
 	                app.root.current = "nowa"
-
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
