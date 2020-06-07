@@ -6,6 +6,7 @@ Config.set('graphics', 'height', '720')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
+import time
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
@@ -26,6 +27,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 import serial
 import threading
+import serial.tools.list_ports
 
 # Żeby móc robić Labele z kolorowym tłem w pliku pythona:
 # Nwm czemu muszą być takie małe wcięcia ale inaczej nie działa XD
@@ -77,7 +79,8 @@ wyscig = []
 sortowane_ok = []
 
 connection = db.connect(database="lapify", user="postgres", password="postgres")
-ser = serial.Serial('COM4', baudrate=9600, timeout=1)
+
+port_number = ""
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
@@ -183,7 +186,7 @@ class Startowa(Screen):
         self.manager.current = "nowa"
 
     def on_enter(self, *args):
-        Clock.schedule_once(self.skip, 5)
+        Clock.schedule_once(self.skip, 0)
 
 
 class NowaSesja(Screen):
@@ -693,6 +696,7 @@ class HistoriaWyscigu(Screen):
 
 
 class Bramki(Screen):
+
     def swap(self):
         Manager.transition = SwapTransition()
 
@@ -705,11 +709,20 @@ class Bramki(Screen):
     def unfade(self):
         Manager.transition = NoTransition()
 
+    def assign_port(self):
+        global port_number
+        port_number = self.ids.port_number.text
+        global ser
+        try:
+            ser = serial.Serial(f'COM{port_number}', baudrate=9600, timeout=1)
+        except serial.SerialException as ex:
+            print("Error! No such serial port")
     def generuj(self):
         tab = self.ids.tabelabramki
         tab.clear_widgets()
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przychodzące pakiety", size=(471, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przypisz", size=(390, 35)))
+
 
     def add_tag_id(self):
         tab = self.ids.tag_id
@@ -959,27 +972,34 @@ ping = []
 
 def packet_receive():
     buffor = ""
+    global port_number
     while 1:
-        data = ser.read()
-        if len(data) != 0 and ord(data) >= 32 and ord(data) <= 128:
-            buffor += str(data.decode('utf-8'))
-        elif (data == b'\r' or data == b'\n') and len(buffor) == 34:
-            if buffor[12:14] == '01':
-                global ping
-                if buffor[2:10] not in ping:
-                    ping.append(buffor[2:10])
-
-            elif buffor[12:14] == '02':
-                timestamp = buffor[22:30]
-                timestamp = int(timestamp, 16) / 3600000
-                timestamp_hours = int(timestamp)
-                timestamp_minutes = (timestamp * 60) % 60
-                timestamp_seconds = (timestamp * 3600) % 60
-                time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
-                print(time)
-            buffor = ""
+        if port_number == "":
+            time.sleep(1)
+        else:
+            try:
+                data = ser.read()
+                if len(data) != 0 and ord(data) >= 32 and ord(data) <= 128:
+                    buffor += str(data.decode('utf-8'))
+                elif (data == b'\r' or data == b'\n') and len(buffor) == 34:
+                    if buffor[12:14] == '01':
+                        global ping
+                        if buffor[2:10] not in ping:
+                            ping.append(buffor[2:10])
+                    elif buffor[12:14] == '02':
+                        timestamp = buffor[22:30]
+                        timestamp = int(timestamp, 16) / 3600000
+                        timestamp_hours = int(timestamp)
+                        timestamp_minutes = (timestamp * 60) % 60
+                        timestamp_seconds = (timestamp * 3600) % 60
+                        race_time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
+                        print(race_time)
+                    buffor = ""
+            except:
+                "Error with data read"
         if thread_stop:
             break
+
 
 
 def receive_thread():
