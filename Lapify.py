@@ -1052,8 +1052,7 @@ def packet_receive():
                 timestamp_seconds = (timestamp * 3600) % 60
                 time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
                 print(time)
-				
-			rfid_tag = str(buffor[14:22])
+                rfid_tag = str(buffor[14:22])
                 nr_bramki = str(buffor[2:10])
 
                 cursor = connection.cursor()

@@ -906,6 +906,23 @@ Manager:
 	            font_size: '24'
 	            text: "Konfiguracja bramek czasowych"
 	            color: hex('#000000')
+            Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.58,"y":0.76}
+	            font_size: '24'
+	            text: "Numer portu: "
+	            color: hex('#000000')
+            TextInput:
+                id: port_number
+                size_hint: (None, None)
+                pos: 865,582
+                size: 50,30
+            Button:
+                size_hint: (None, None)
+                pos: 920,582
+                text: "OK"
+                size: 50,30
+                on_press: root.assign_port()
 	    FloatLayout:
 	        id: oknobramki
             GridLayout:      # Ciemna obwódka wokół tabeli
