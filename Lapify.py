@@ -970,10 +970,15 @@ thread_stop = False
 
 ping = []
 
+def clear_ping():
+    global ping
+    ping.clear()
+
 def packet_receive():
     buffor = ""
     global port_number
     while 1:
+        threading.Timer(5,clear_ping).start()
         if port_number == "":
             time.sleep(1)
         else:
