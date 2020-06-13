@@ -3,6 +3,7 @@
 #:import hex kivy.utils.get_color_from_hex
 #:import utils kivy.utils
 #:import Factory kivy.factory.Factory
+
 Manager:
 	transition: NoTransition()
 	Startowa:
@@ -12,6 +13,8 @@ Manager:
     NowyKierowca:
     DodajKierowce:
     Live:
+    WynikiKierowcy:
+    SzczegolyOkrazenia:
     PoprzednieSesje:
     HistoriaWyscigu:
     Pomoc:
@@ -118,7 +121,7 @@ Manager:
                 text: root.text2
                 on_release:
                     root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
-                    app.root.current = "rozpocznij"
+                    app.root.current = "bramki"
                     root.unfade()
 
             Button:
@@ -221,35 +224,45 @@ Manager:
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
-                size: (734,504.5)
-                pos_hint:{"x":0.0185,"y":0.167}
+                size: (734,639)
+                pos_hint:{"x":0,"y":0}
                 canvas:
                     Color:
                         rgba: hex('#404040')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:      # Tabela
-                id: tabelaPoprzednie
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (730,500)
-                pos_hint:{"x":0.02,"y":0.17}
-                canvas:
-                    Color:
-                        rgba: hex('#606060')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+            ScrollView:
+                size_hint:(0.59,.88)
+                do_scroll_x: False
+                do_scroll_y: True
+                bar_width: 20
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelaPoprzednie
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (730,1000)
+                    pos_hint:{"x":0.02,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
 
 ######################################################
 <Live>:
     name: "live"
     on_pre_enter: root.generuj()    # Wyświetlamy zaktualizowaną
-    on_pre_leave: tabelaLive.clear_widgets()    # Czyścimy tabele
+    on_leave:
+        tabelaLive.clear_widgets()    # Czyścimy tabele
+        plansza.clear_widgets()
+
 
     canvas:
         Color:
@@ -316,8 +329,9 @@ Manager:
                 app.root.current = "pomocy"
 
         FloatLayout:
-            id: plansza
 
+            FloatLayout:
+                id: plansza
 
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
@@ -344,6 +358,194 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
+
+######################################################
+<WynikiKierowcy>:
+    name: "kierowca"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaKierowca.clear_widgets()
+        planszaKierowca.clear_widgets()
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: planszaKierowca
+
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaKierowca
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                pos_hint:{"x":0.84,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: root.text2
+                on_release:
+                    app.root.current = "live"
+
+######################################################
+<SzczegolyOkrazenia>:
+    name: "okrazenie"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaOkrazenia.clear_widgets()
+        planszaOkrazenia.clear_widgets()
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: planszaOkrazenia
+
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaOkrazenia
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                pos_hint:{"x":0.84,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: root.text2
+                on_release:
+                    app.root.current = "kierowca"
 
 ######################################################
 <Pomoc>:
@@ -520,8 +722,9 @@ Manager:
 	    FloatLayout:
 	        Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.43,"y":0.76}
+	            pos_hint: {"x":0.47,"y":0.76}
 	            font_size: '24'
+	            color: hex('#000000')
 	            text: root.text2
 
 
@@ -531,7 +734,7 @@ Manager:
                 pos_hint:{"x":0.2,"y":0.2}
                 canvas:
                     Color:
-                        rgba: hex('#404040')
+                        rgba: hex('#606060')
                     Rectangle:
                         pos: self.pos
                         size: self.size
@@ -627,6 +830,8 @@ Manager:
 ######################################################
 <Bramki>:
     name: "bramki"
+    on_enter:
+        root.generuj()
     canvas.before:
         Color:
 	        rgba: hex('#6F696D')
@@ -691,67 +896,64 @@ Manager:
 	            font_size: '24'
 	            text: "Konfiguracja bramek czasowych"
 	            color: hex('#000000')
-	        Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.165,"y":0.69}
-	            font_size: '18'
-	            text: "Bramka Start:"
-	            color: hex('#000000')
-
-	        TextInput:
-	            id: start
+	    FloatLayout:
+	        id: oknobramki
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (864,424.5)
+                pos_hint:{"x":0.15,"y":0.215}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            StackLayout:      # Tabela
+                id: tabelabramki
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (862,423)
+                pos_hint:{"x":0.1507,"y":0.216}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (860,420)
+                pos_hint:{"x":0.153,"y":0.175}
+                id: tag_id
+            Button:
+                text: "Odswiez"
+                background_color: hex('#FFFFFF')
+                color: hex('#E27814')
 	            size_hint: (None,None)
-	            size: 300,36
-	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.732}
-	            multiline: False
-
-	        Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.18,"y":0.61}
-	            font_size: '18'
-	            text: "Bramka Srodkowa:"
-	            color: hex('#000000')
-
-	        TextInput:
-	            id: srodek
-	            size_hint: (None,None)
-	            size: 300,36
-	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.65}
-	            multiline: False
-
-            Label:
-	        	size_hint: (None,None)
-	            pos_hint: {"x":0.165,"y":0.53}
-	            font_size: '18'
-	            text: "Bramka Meta:"
-	            color: hex('#000000')
-
-	        TextInput:
-	            id: meta
-	            size_hint: (None,None)
-	            size: 300,36
-	            font_size: '18'
-	            pos_hint: {"x":0.28,"y":0.568}
-	            multiline: False
-
+	            pos_hint: {"x":0.6,"y":0.15}
+	            size: 110,40
+                on_release: root.add_tag_id()
             Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.7,"y":0.15}
 	            size: 110,40
-	            text: "Zatwierdz"
+	            text: "Dalej"
+	            color: hex('#E27814')
 	            on_release:
-                    root.input()
-	                app.root.current = "nowa"
-
+	                root.fade()
+	                app.root.current = "rozpocznij"
+	                root.unfade()
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.18,"y":0.15}
 	            size: 110,40
 	            text: "Cofnij"
+	            color: hex('#E27814')
 	            on_release:
 	                root.fade()
 	                app.root.current = "nowa"
@@ -793,7 +995,7 @@ Manager:
                 size: self.width, 40
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: root.text1
+            text: "Strona Glowna"
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -808,76 +1010,71 @@ Manager:
 		    Color:
 			    rgba: hex('#000000')
 		    Rectangle:
-			    pos: 350,178
-			    size: 504,344
+			    pos: 173,73
+			    size: 934,554
     FloatLayout:    #okienko
 	    canvas:
 		    Color:
 			    rgba: hex('#808080')
 		    Rectangle:
-			    pos: 352,180
-			    size: 500,340
+			    pos: 175,75
+			    size: 930,550
 	    FloatLayout:
-	        Label:
+            Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.43,"y":0.63}
+	            pos_hint: {"x":0.47,"y":0.76}
 	            font_size: '24'
-	            text: "Nowa sesja"
+	            color: hex('#000000')
+	            text: "Dodawanie nazwy wyscigu"
+
 
 	        Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.3,"y":0.56}
-	            font_size: '19'
+	            pos_hint: {"x":0.27,"y":0.51}
+	            font_size: '22'
+	            color: hex('#000000')
 	            text: root.text2
 
 	        TextInput:
 	            id: wyscig
 	            size_hint: (None,None)
-	            size: 250,36
+	            size: 300,50
 	            font_size: '18'
-	            pos_hint: {"x":0.4,"y":0.60}
+	            pos_hint: {"x":0.4,"y":0.55}
 	            multiline: False
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            pos_hint: {"x":0.6,"y":0.59}
+	            pos_hint: {"x":0.65,"y":0.55}
 	            size: 50,50
+	            color: hex('#E27814')
 	            text: "OK"
-	            color: hex('#E27814')
-                on_release:
-                    root.input()
-            Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
-	            pos_hint: {"x":0.409,"y":0.4}
-	            size: 200,80
-	            text: root.text3
-	            color: hex('#E27814')
-                on_release:
-                    app.root.current = "dodaj"
+                on_release:root.input()
+
 
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            pos_hint: {"x":0.3,"y":0.27}
+	            pos_hint: {"x":0.15,"y":0.12}
 	            size: 110,40
 	            text: "Cofnij"
 	            color: hex('#E27814')
 	            on_release:
 	                root.fade()
-	                app.root.current = "nowa"
+	                app.root.current = "bramki"
 	                root.unfade()
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            pos_hint: {"x":0.56,"y":0.27}
+	            pos_hint:{"center_x":0.8,"y":0.13}
 	            size: 110,40
 	            text: "Dalej"
 	            color: hex('#E27814')
 	            on_release:
-                    root.swap()     #fajne przejście
-                    app.root.current = "live"
-                    root.unswap()   #powrót do normalnego
+                    root.fade()
+                    app.root.current = "dodaj"
+                    root.unfade()
+
 
 ################################################################################################
 <HistoriaWyscigu>:
@@ -1065,20 +1262,28 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:
-                id: tabelaRFID
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (770,390)
+            ScrollView:
+                size_hint:(0.616,.54)
+                do_scroll_x: False
+                do_scroll_y: True
                 pos_hint:{"x":0.2,"y":0.2}
-                canvas:
-                    Color:
-                        rgba: hex('#707070')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaRFID
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
             Label:
 	        	size_hint: (None,None)
