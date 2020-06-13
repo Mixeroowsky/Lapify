@@ -7,6 +7,7 @@ Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
 import time
+import datetime
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
@@ -56,8 +57,12 @@ Builder.load_string("""
   on_release: 
     app.root.switch(self.id)
     app.root.current = "kierowca"
-<BramkaButton>:
-  background_down: 'graphics/pressed.png'    
+<StartButton>:
+    background_down: 'graphics/pressed.png'
+<KontrolnyButton>:
+    background_down: 'graphics/pressed.png'
+<MetaButton>:
+    background_down: 'graphics/pressed.png'   
 <OkrazenieButton>:
   background_down: 'graphics/pressed.png'
   id: 0
@@ -86,7 +91,13 @@ class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
 
 
-class BramkaButton(Button):
+class StartButton(Button):
+    pass
+
+class KontrolnyButton(Button):
+    pass
+
+class MetaButton(Button):
     pass
 
 
@@ -218,7 +229,7 @@ class NowaSesja(Screen):
 
         ekran.add_widget(Label(text=f"{str(data_wyscigu)}",
                                size_hint=(None, None),
-                               pos_hint={"x": 0.27, "y": 0.75},
+                               pos_hint={"x": 0.27, "y": 0.755},
                                font_size="15",
                                color=get_color_from_hex('#EF8B00')))
 
@@ -361,7 +372,7 @@ class Live(Screen):
 
         bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.15, "y": 0.8},
+                            pos_hint={"x": 0.06, "y": 0.835},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
@@ -566,7 +577,7 @@ class PoprzednieSesje(Screen):
 
         bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.09, "y": 0.84},
+                            pos_hint={"x": 0.082, "y": 0.835},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
@@ -642,15 +653,15 @@ class HistoriaWyscigu(Screen):
         nazwa_wyscigu = dane[0][5]
         data = dane[0][4]
 
-        bg.add_widget(Label(text=f"Historia wyścigu {nazwa_wyscigu}",
+        bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.45, "y": 0.755},
-                            font_size="24",
-                            color=get_color_from_hex('#000000')))
+                            pos_hint={"x": 0.09, "y": 0.85},
+                            font_size="30",
+                            color=get_color_from_hex('#EF8B00')))
 
         bg.add_widget(Label(text=f"Data: {data}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.24, "y": 0.7},
+                            pos_hint={"x": 0.24, "y": 0.8},
                             font_size="20",
                             color=get_color_from_hex('#000000')))
 
@@ -725,6 +736,7 @@ class Bramki(Screen):
 
 
     def add_tag_id(self):
+        global num
         tab = self.ids.tag_id
         tab.clear_widgets()
         for i in range(len(ping)):
@@ -733,9 +745,62 @@ class Bramki(Screen):
             tag_list.add_widget(
                 PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=ping[i], color=get_color_from_hex('ffffff'),
                            size=(469, 35)))
-            tag_list.add_widget(BramkaButton(text="Start", size_hint=(None, None), size=(129, 35)))
-            tag_list.add_widget(BramkaButton(text="Punkt kontrolny", size_hint=(None, None), size=(129, 35)))
-            tag_list.add_widget(BramkaButton(text="Meta", size_hint=(None, None), size=(129, 35)))
+            tag_list.add_widget(StartButton(text="Start", size_hint=(None, None), size=(129, 35),
+                                            on_release=lambda x: self.updateStart()))
+            tag_list.add_widget(KontrolnyButton(text="Punkt kontrolny", size_hint=(None, None), size=(129, 35),
+                                                on_release=lambda x: self.updateKontrolny()))
+            tag_list.add_widget(
+                MetaButton(text="Meta", size_hint=(None, None), size=(129, 35), on_release=lambda x: self.updateMeta()))
+            num = i
+
+    def updateStart(self):
+        global num
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=1 ")
+        bramka = cursor.fetchall()
+        print(bramka)
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{1}"))
+
+        cursor.close()
+        connection.commit()
+        connection.close()
+
+    def updateKontrolny(self):
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=2 ")
+        bramka = cursor.fetchall()
+        print(bramka)
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{2}"))
+
+        cursor.close()
+        connection.commit()
+        connection.close()
+
+    def updateMeta(self):
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=3 ")
+        bramka = cursor.fetchall()
+        print(bramka)
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{3}"))
+
+        cursor.close()
+        connection.commit()
+        connection.close()
 
 
 class Rozpocznij(Screen):

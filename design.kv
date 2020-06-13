@@ -145,27 +145,36 @@ Manager:
                     cols: 1
                     size_hint: (None,None)
                     size: (734,504.5)
-                    pos_hint:{"x":0.0185,"y":0.1}
+                    pos_hint:{"x":0.009,"y":0.113}
                     canvas:
                         Color:
                             rgba: hex('#404040')
                         Rectangle:
                             pos: self.pos
                             size: self.size
+                ScrollView:
+                    size_hint:(0.585,.696)
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    pos_hint:{"x":0.011,"y":0.115}
+                    bar_width: 16
+                    bar_color: 5, 10, 15, .8
+                    bar_inactive_color: 5, 20, 10, .5
+                    scroll_type: ['bars']
+                    StackLayout:      # Tabela
+                        id: tabelaOstatniaSesja
+                        orientation: 'lr-tb'
+                        spacing: [1,1]
+                        size_hint: (None,None)
+                        size: (730,2000)
+                        pos_hint:{"x":0.02,"y":0.103}
+                        canvas:
+                            Color:
+                                rgba: hex('#606060')
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
 
-                StackLayout:      # Tabela
-                    id: tabelaOstatniaSesja
-                    orientation: 'lr-tb'
-                    spacing: [1,1]
-                    size_hint: (None,None)
-                    size: (730,500)
-                    pos_hint:{"x":0.02,"y":0.103}
-                    canvas:
-                        Color:
-                            rgba: hex('#606060')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
 
 ################################################################################################
 <PoprzednieSesje>:
@@ -224,28 +233,36 @@ Manager:
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
-                size: (734,504.5)
-                pos_hint:{"x":0.0185,"y":0.167}
+                size: (734,505)
+                pos_hint:{"x":0.009,"y":0.113}
                 canvas:
                     Color:
                         rgba: hex('#404040')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:      # Tabela
-                id: tabelaPoprzednie
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (730,500)
-                pos_hint:{"x":0.02,"y":0.17}
-                canvas:
-                    Color:
-                        rgba: hex('#606060')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+            ScrollView:
+                size_hint:(0.585,.696)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.011,"y":0.115}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelaPoprzednie
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (730,2000)
+                    pos_hint:{"x":0.01,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
 
 ######################################################
@@ -330,27 +347,35 @@ Manager:
                 cols: 1
                 size_hint: (None,None)
                 size: (956,504.5)
-                pos_hint:{"x":0.0087,"y":0.167}
+                pos_hint:{"x":0.0087,"y":0.168}
                 canvas:
                     Color:
                         rgba: hex('#404040')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:      # Tabela
-                id: tabelaLive
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (952,500)
+            ScrollView:
+                size_hint:(0.759,.696)
+                do_scroll_x: False
+                do_scroll_y: True
                 pos_hint:{"x":0.01,"y":0.17}
-                canvas:
-                    Color:
-                        rgba: hex('#606060')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelaLive
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (952,2000)
+                    pos_hint:{"x":0.01,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
 ######################################################
 <WynikiKierowcy>:
@@ -910,27 +935,36 @@ Manager:
             GridLayout:      # Ciemna obwódka wokół tabeli
                 cols: 1
                 size_hint: (None,None)
-                size: (864,424.5)
-                pos_hint:{"x":0.15,"y":0.215}
+                size: (868,424.5)
+                pos_hint:{"x":0.149,"y":0.215}
                 canvas:
                     Color:
                         rgba: hex('#404040')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-            StackLayout:      # Tabela
-                id: tabelabramki
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (862,423)
-                pos_hint:{"x":0.1507,"y":0.216}
-                canvas:
-                    Color:
-                        rgba: hex('#606060')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+            ScrollView:
+                size_hint:(0.689,.581)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.151,"y":0.22}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelabramki
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (862,1000)
+                    pos_hint:{"x":0.1507,"y":0.216}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
             GridLayout:
                 cols: 1
                 size_hint: (None,None)
@@ -1167,20 +1201,28 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:
-                id: tabelaHistoria
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (770,390)
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
                 pos_hint:{"x":0.2,"y":0.2}
-                canvas:
-                    Color:
-                        rgba: hex('#707070')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaHistoria
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
             Button:
                 size_hint: 0.1, 0.05
@@ -1271,20 +1313,28 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-            StackLayout:
-                id: tabelaRFID
-                orientation: 'lr-tb'
-                spacing: [1,1]
-                size_hint: (None,None)
-                size: (770,390)
+            ScrollView:
+                size_hint:(0.616,.54)
+                do_scroll_x: False
+                do_scroll_y: True
                 pos_hint:{"x":0.2,"y":0.2}
-                canvas:
-                    Color:
-                        rgba: hex('#707070')
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaRFID
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
             Label:
 	        	size_hint: (None,None)
