@@ -43,6 +43,10 @@ Builder.load_string("""
     Rectangle:
       pos: self.pos
       size: self.size
+<PolaczButton>:
+  background_down: 'graphics/pressed.png'
+  on_press: 
+    app.root.switch(self.id)
 <HistoriaButton>:
   background_down: 'graphics/pressed.png'
   id: 0
@@ -832,7 +836,6 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
         connection = db.connect(user="postgres",
                                 password="postgres",
                                 database="lapify")
-
         text = text_input[number].text
 
         cursor = connection.cursor()
@@ -845,13 +848,13 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
                        "where data_wyscigu = (select max(data_wyscigu) from wyscig)")
 
         b = cursor.fetchall()
-        print(b)
+
 
         cursor = connection.cursor()
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
                        (len(t) + 1, b[0], text_id[number], text))
         # cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
-        print(text)
+
         cursor.close()
         connection.commit()
         connection.close()
