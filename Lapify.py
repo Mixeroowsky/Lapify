@@ -6,6 +6,7 @@ Config.set('graphics', 'height', '720')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
+import datetime
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
@@ -24,8 +25,7 @@ from kivy.lang import Builder
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
-import datetime
-#import serial
+import serial
 import threading
 
 # Żeby móc robić Labele z kolorowym tłem w pliku pythona:
@@ -59,8 +59,12 @@ Builder.load_string("""
   on_release: 
     app.root.switch(self.id)
     app.root.current = "kierowca"
-<BramkaButton>:
-  background_down: 'graphics/pressed.png'    
+<StartButton>:
+    background_down: 'graphics/pressed.png'
+<KontrolnyButton>:
+    background_down: 'graphics/pressed.png'
+<MetaButton>:
+    background_down: 'graphics/pressed.png'   
 <OkrazenieButton>:
   background_down: 'graphics/pressed.png'
   id: 0
@@ -69,6 +73,10 @@ Builder.load_string("""
     app.root.inside_switch(self.id)
     app.root.enum_switch(self.enum_id)
     app.root.current = "okrazenie"
+<PolaczButton>:
+  background_down: 'graphics/pressed.png'
+  on_release: 
+    app.root.switch(self.id)
 """)
 
 number = 0
@@ -82,13 +90,19 @@ wyscig = []
 sortowane_ok = []
 
 connection = db.connect(database="lapify", user="postgres", password="postgres")
-#ser = serial.Serial('COM4', baudrate=9600, timeout=1)
+ser = serial.Serial('COM4', baudrate=9600, timeout=1)
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
 
 
-class BramkaButton(Button):
+class StartButton(Button):
+    pass
+
+class KontrolnyButton(Button):
+    pass
+
+class MetaButton(Button):
     pass
 
 
@@ -220,7 +234,7 @@ class NowaSesja(Screen):
 
         ekran.add_widget(Label(text=f"{str(data_wyscigu)}",
                                size_hint=(None, None),
-                               pos_hint={"x": 0.27, "y": 0.75},
+                               pos_hint={"x": 0.27, "y": 0.755},
                                font_size="15",
                                color=get_color_from_hex('#EF8B00')))
 
@@ -363,7 +377,7 @@ class Live(Screen):
 
         bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.15, "y": 0.8},
+                            pos_hint={"x": 0.06, "y": 0.835},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
@@ -568,7 +582,7 @@ class PoprzednieSesje(Screen):
 
         bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.09, "y": 0.84},
+                            pos_hint={"x": 0.082, "y": 0.835},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
@@ -644,7 +658,7 @@ class HistoriaWyscigu(Screen):
         nazwa_wyscigu = dane[0][5]
         data = dane[0][4]
 
-        bg.add_widget(Label(text=f"Historia wyścigów:{nazwa_wyscigu} ",
+        bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
                             pos_hint={"x": 0.09, "y": 0.85},
                             font_size="30",
@@ -717,6 +731,7 @@ class Bramki(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przypisz", size=(390, 35)))
 
     def add_tag_id(self):
+        global num
         tab = self.ids.tag_id
         tab.clear_widgets()
         for i in range(len(ping)):
@@ -725,15 +740,69 @@ class Bramki(Screen):
             tag_list.add_widget(
                 PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=ping[i], color=get_color_from_hex('ffffff'),
                            size=(469, 35)))
-            tag_list.add_widget(BramkaButton(text="Start", size_hint=(None, None), size=(129, 35)))
-            tag_list.add_widget(BramkaButton(text="Punkt kontrolny", size_hint=(None, None), size=(129, 35)))
-            tag_list.add_widget(BramkaButton(text="Meta", size_hint=(None, None), size=(129, 35)))
+            tag_list.add_widget(StartButton(text="Start", size_hint=(None, None), size=(129, 35),
+                                            on_release=lambda x: self.updateStart()))
+            tag_list.add_widget(KontrolnyButton(text="Punkt kontrolny", size_hint=(None, None), size=(129, 35),
+                                                on_release=lambda x: self.updateKontrolny()))
+            tag_list.add_widget(
+                MetaButton(text="Meta", size_hint=(None, None), size=(129, 35), on_release=lambda x: self.updateMeta()))
+            num = i
+
+    def updateStart(self):
+        global num
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=1 ")
+        bramka = cursor.fetchall()
+        print(bramka)
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{1}"))
+
+        cursor.close()
+        connection.commit()
+        connection.close()
+
+    def updateKontrolny(self):
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=2 ")
+        bramka = cursor.fetchall()
+        print(bramka)
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{2}"))
+
+        cursor.close()
+        connection.commit()
+        connection.close()
+
+    def updateMeta(self):
+        connection = db.connect(user="postgres",
+                                password="postgres",
+                                database="lapify")
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=3 ")
+        bramka = cursor.fetchall()
+        print(bramka)
+
+        cursor = connection.cursor()
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{3}"))
+
+        cursor.close()
+        connection.commit()
+        connection.close()
 
 
 class Rozpocznij(Screen):
-
+    text1 = "Strona główna"
     text2 = "Nazwa wyścigu:"
-
+    text3 = "Dodaj kierowcę"
+    text4 = "Wybierz kierowcę"
 
     def swap(self):
         Manager.transition = SwapTransition()
@@ -760,7 +829,7 @@ class Rozpocznij(Screen):
             cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
             rows = cursor.fetchall()
             cursor.execute("insert into wyscig (id_wyscigu, nazwa_wyscigu, data_wyscigu ) values (%s, %s, %s);commit",
-                           (len(rows) + 1, nazwa_wyscigu.text, datetime.date.today()))
+                           (len(rows) + 1, nazwa_wyscigu.text, date.today()))
             cursor.close()
 
     def unswap(self):
@@ -777,7 +846,7 @@ text_input = []
 text_id = []
 
 
-class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się żeby odświeżyć
+class PolaczRFID(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -791,9 +860,8 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
         cursor = connection.cursor()
 
         cursor.execute("SELECT distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu\
-                                  FROM public.kierowca AS k\
-                                  ORDER BY k.id_kierowcy")
-
+                                          FROM public.kierowca AS k\
+                                          ORDER BY k.id_kierowcy")
 
         daner = cursor.fetchall()
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="ID", size=(85, 35)))
@@ -854,7 +922,6 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
                        (len(t) + 1, b[0], text_id[number], text))
         # cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
-
         cursor.close()
         connection.commit()
         connection.close()
