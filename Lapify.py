@@ -56,11 +56,17 @@ Builder.load_string("""
     app.root.switch(self.id)
     app.root.current = "kierowca"
 <StartButton>:
-    background_down: 'graphics/pressed.png'
+  background_down: 'graphics/pressed.png'
+  on_press: 
+    app.root.switch(self.id)
 <KontrolnyButton>:
-    background_down: 'graphics/pressed.png'
+  background_down: 'graphics/pressed.png'
+  on_press: 
+    app.root.switch(self.id)
 <MetaButton>:
-    background_down: 'graphics/pressed.png'   
+  background_down: 'graphics/pressed.png'
+  on_press: 
+    app.root.switch(self.id)       
 <OkrazenieButton>:
   background_down: 'graphics/pressed.png'
   id: 0
@@ -82,7 +88,7 @@ wyscig = []
 sortowane_ok = []
 
 connection = db.connect(database="lapify", user="postgres", password="postgres")
-ser = serial.Serial('COM4', baudrate=9600, timeout=1)
+ser = serial.Serial('COM7', baudrate=9600, timeout=1)
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
@@ -723,7 +729,9 @@ class Bramki(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przypisz", size=(390, 35)))
 
     def add_tag_id(self):
-        global num
+        global number
+        global ping
+
         tab = self.ids.tag_id
         tab.clear_widgets()
         for i in range(len(ping)):
@@ -732,58 +740,64 @@ class Bramki(Screen):
             tag_list.add_widget(
                 PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=ping[i], color=get_color_from_hex('ffffff'),
                            size=(469, 35)))
-            tag_list.add_widget(StartButton(text="Start", size_hint=(None, None), size=(129, 35),
+            tag_list.add_widget(StartButton(text="Start",id=f"{i}", size_hint=(None, None), size=(129, 35),
                                             on_release=lambda x: self.updateStart()))
-            tag_list.add_widget(KontrolnyButton(text="Punkt kontrolny", size_hint=(None, None), size=(129, 35),
+            tag_list.add_widget(KontrolnyButton(text="Punkt kontrolny", id=f"{i}", size_hint=(None, None), size=(129, 35),
                                                 on_release=lambda x: self.updateKontrolny()))
             tag_list.add_widget(
-                MetaButton(text="Meta", size_hint=(None, None), size=(129, 35), on_release=lambda x: self.updateMeta()))
-            num = i
+                MetaButton(text="Meta", id=f"{i}", size_hint=(None, None), size=(129, 35), on_release=lambda x: self.updateMeta()))
+
 
     def updateStart(self):
-        global num
+        global number
+        global ping
         connection = db.connect(user="postgres",
                                 password="postgres",
                                 database="lapify")
         cursor = connection.cursor()
         cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=1 ")
         bramka = cursor.fetchall()
-        print(bramka)
+
 
         cursor = connection.cursor()
-        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{1}"))
+
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[int(number)], f"{1}"))
 
         cursor.close()
         connection.commit()
         connection.close()
 
     def updateKontrolny(self):
+        global number
+        global ping
         connection = db.connect(user="postgres",
                                 password="postgres",
                                 database="lapify")
         cursor = connection.cursor()
         cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=2 ")
         bramka = cursor.fetchall()
-        print(bramka)
+
 
         cursor = connection.cursor()
-        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{2}"))
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[int(number)], f"{2}"))
 
         cursor.close()
         connection.commit()
         connection.close()
 
     def updateMeta(self):
+        global number
+        global ping
         connection = db.connect(user="postgres",
                                 password="postgres",
                                 database="lapify")
         cursor = connection.cursor()
         cursor.execute("SELECT id_bramki, nr_bramki FROM public.bramka WHERE id_bramki=3 ")
         bramka = cursor.fetchall()
-        print(bramka)
+
 
         cursor = connection.cursor()
-        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[num], f"{3}"))
+        cursor.execute("UPDATE public.bramka SET nr_bramki = %s WHERE id_bramki = %s", (ping[int(number)], f"{3}"))
 
         cursor.close()
         connection.commit()
@@ -910,13 +924,13 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
                        "where data_wyscigu = (select max(data_wyscigu) from wyscig)")
 
         b = cursor.fetchall()
-        print(b)
+
 
         cursor = connection.cursor()
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
                        (len(t) + 1, b[0], text_id[number], text))
         # cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
-        print(text)
+
         cursor.close()
         connection.commit()
         connection.close()
@@ -928,6 +942,7 @@ class Manager(ScreenManager):
     def switch(x):
         global number
         number = x
+
 
     @staticmethod
     def inside_switch(x):
