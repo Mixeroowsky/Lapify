@@ -6,7 +6,7 @@ import time
 from enum import Enum
 
 packet_num = 0
-ser = serial.Serial('COM3', baudrate=9600, timeout=1)
+ser = serial.Serial('COM8', baudrate=9600, timeout=1)
 
 
 class Type(Enum):
@@ -60,6 +60,21 @@ def generate_packet(type, gps):
     packet = "01" + sensor_id + get_packet_num_increment() + packet_type + tag_id + get_timestamp(gps)
     return add_crc(packet)
 
+def generate_packet2(type, gps):
+    sensor_id = "AACCCCDD"
+    tag_id = "EECCAABB"
+
+    if type == Type.ping:
+        packet_type = "01"
+        tag_id = "FFFFFFFF"
+    elif type == Type.proximity:
+        packet_type = "02"
+    elif type == Type.photocell:
+        packet_type = "03"
+
+    packet = "01" + sensor_id + get_packet_num_increment() + packet_type + tag_id + get_timestamp(gps)
+    return add_crc(packet)
+
 
 i = 1
 gps = GPS.fixed
@@ -68,17 +83,27 @@ while True:
     proximity = generate_packet(Type.proximity, gps)
     ping = generate_packet(Type.ping, gps)
 
+    photocell2 = generate_packet2(Type.photocell, gps)
+    proximity2 = generate_packet2(Type.proximity, gps)
+    ping2 = generate_packet2(Type.ping, gps)
+
     if (i % 20 == 0):
         print(generate_packet(Type.photocell, gps))
+        print(generate_packet2(Type.photocell, gps))
         ser.write((photocell + '\r').encode())
+        ser.write((photocell2 + '\r').encode())
         ser.reset_input_buffer()
     elif (i % 10 == 0):
         print(generate_packet(Type.proximity, gps))
+        print(generate_packet2(Type.proximity, gps))
         ser.write((proximity + '\r').encode())
+        ser.write((proximity2 + '\r').encode())
         ser.reset_input_buffer()
     else:
         print(generate_packet(Type.ping,gps))
+        print(generate_packet2(Type.ping, gps))
         ser.write((ping + '\r').encode())
+        ser.write((ping2 + '\r').encode())
         ser.reset_input_buffer()
     time.sleep(random.randint(5, 15) / 10)
     i += 1
