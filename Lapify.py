@@ -6,7 +6,6 @@ Config.set('graphics', 'height', '720')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
-import datetime
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
