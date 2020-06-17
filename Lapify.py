@@ -6,7 +6,6 @@ Config.set('graphics', 'height', '720')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
-import datetime
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
@@ -43,6 +42,10 @@ Builder.load_string("""
     Rectangle:
       pos: self.pos
       size: self.size
+<PolaczButton>:
+  background_down: 'graphics/pressed.png'
+  on_press: 
+    app.root.switch(self.id)
 <HistoriaButton>:
   background_down: 'graphics/pressed.png'
   id: 0
@@ -69,6 +72,10 @@ Builder.load_string("""
     app.root.inside_switch(self.id)
     app.root.enum_switch(self.enum_id)
     app.root.current = "okrazenie"
+<PolaczButton>:
+  background_down: 'graphics/pressed.png'
+  on_release: 
+    app.root.switch(self.id)
 """)
 
 number = 0
@@ -821,7 +828,7 @@ class Rozpocznij(Screen):
             cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
             rows = cursor.fetchall()
             cursor.execute("insert into wyscig (id_wyscigu, nazwa_wyscigu, data_wyscigu ) values (%s, %s, %s);commit",
-                           (len(rows) + 1, nazwa_wyscigu.text, datetime.date.today()))
+                           (len(rows) + 1, nazwa_wyscigu.text, date.today()))
             cursor.close()
 
     def unswap(self):
@@ -838,7 +845,7 @@ text_input = []
 text_id = []
 
 
-class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się żeby odświeżyć
+class PolaczRFID(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
@@ -851,10 +858,9 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
 
         cursor = connection.cursor()
 
-        cursor.execute("SELECT distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,  p.rfid\
-                                  FROM public.kierowca AS k\
-                                  LEFT JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
-                                  JOIN public.przejazd AS r ON p.id_przypisania = r.id_przypisania")
+        cursor.execute("SELECT distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu\
+                                          FROM public.kierowca AS k\
+                                          ORDER BY k.id_kierowcy")
 
         daner = cursor.fetchall()
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="ID", size=(85, 35)))
@@ -897,7 +903,6 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
         connection = db.connect(user="postgres",
                                 password="postgres",
                                 database="lapify")
-
         text = text_input[number].text
 
         cursor = connection.cursor()
@@ -910,13 +915,12 @@ class PolaczRFID(Screen):  # Pusty ekran na który na moment przełączamy się 
                        "where data_wyscigu = (select max(data_wyscigu) from wyscig)")
 
         b = cursor.fetchall()
-        print(b)
+
 
         cursor = connection.cursor()
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
                        (len(t) + 1, b[0], text_id[number], text))
         # cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
-        print(text)
         cursor.close()
         connection.commit()
         connection.close()
