@@ -1052,6 +1052,41 @@ def packet_receive():
                 timestamp_seconds = (timestamp * 3600) % 60
                 time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
                 print(time)
+				
+			rfid_tag = str(buffor[14:22])
+                nr_bramki = str(buffor[2:10])
+
+                cursor = connection.cursor()
+
+                cursor.execute("SELECT id_przejazdu FROM przejazd ")
+                rows = cursor.fetchall()
+
+                cursor.execute("SELECT id_przypisania from przypisanie"
+                               " where rfid = '%s' " % rfid_tag)
+                id_przypisania = cursor.fetchall()
+
+                cursor.execute("SELECT id_bramki from bramka"
+                               " where nr_bramki = '%s' " % nr_bramki)
+                id_bramki = cursor.fetchall()
+
+                cursor.execute("SELECT id_bramki FROM przejazd ORDER BY id_przejazdu desc LIMIT 1")
+                ostatnia_bramka = cursor.fetchall()
+
+                cursor.execute("SELECT id_ok FROM przejazd order by id_przejazdu desc limit 1 ")
+                next_ok = cursor.fetchall()
+                if ostatnia_bramka[0][0] == 3:
+                    a = next_ok[0][0]
+                    a += 1
+                    cursor.execute(
+                        " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s)",
+                        (len(rows) + 1, a, id_przypisania[0], id_bramki[0], time))
+
+                else:
+                    cursor.execute(
+                        " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s)",
+                        (len(rows) + 1, next_ok[0], id_przypisania[0], id_bramki[0], time))
+                    
+
             buffor = ""
         if thread_stop:
             break
