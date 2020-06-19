@@ -6,6 +6,7 @@ Config.set('graphics', 'height', '720')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
+import datetime
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
@@ -42,10 +43,6 @@ Builder.load_string("""
     Rectangle:
       pos: self.pos
       size: self.size
-<PolaczButton>:
-  background_down: 'graphics/pressed.png'
-  on_press: 
-    app.root.switch(self.id)
 <HistoriaButton>:
   background_down: 'graphics/pressed.png'
   id: 0
@@ -74,8 +71,11 @@ Builder.load_string("""
     app.root.current = "okrazenie"
 <PolaczButton>:
   background_down: 'graphics/pressed.png'
-  on_release: 
+  on_press: 
     app.root.switch(self.id)
+<OKButton>:
+  on_release:
+    app.root.current = "poprzednie"
 """)
 
 number = 0
@@ -633,80 +633,97 @@ class HistoriaWyscigu(Screen):
     text1 = "Strona główna"
     text2 = 'Wróć'
 
+    def swap(self):
+        Manager.transition = SwapTransition()
+
+    content = Button(text='OK',
+                     background_down='graphics/pressed.png' )
+
+    error = Popup(title='Dodaj kierowcow do wyscigu!',
+                  title_align='center',
+                  title_size=16,
+                  content=content,
+                  size_hint=(None, None), size=(220, 100),
+                  auto_dismiss=False,
+                  separator_color=[38 / 255., 38 / 255., 38 / 255., 1.])
+    content.bind(on_release=error.dismiss)
+
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
     def generuj(self):
-        tab = self.ids.tabelaHistoria
-        bg = self.ids.oknoHistoria
+        try:
+            tab = self.ids.tabelaHistoria
+            bg = self.ids.oknoHistoria
 
-        connection = db.connect(user="postgres",
-                                password="postgres",
-                                database="lapify")
+            connection = db.connect(user="postgres",
+                                    password="postgres",
+                                    database="lapify")
 
-        cursor = connection.cursor()
+            cursor = connection.cursor()
 
-        cursor.execute("SELECT k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu\
-                        FROM public.kierowca AS k\
-                        JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
-                        JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu"
-                       f"    where w.id_wyscigu = {number} ;")
+            cursor.execute("SELECT k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu\
+                            FROM public.kierowca AS k\
+                            JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
+                            JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu"
+                           f"    where w.id_wyscigu = {number} ;")
 
-        dane = cursor.fetchall()
+            dane = cursor.fetchall()
 
-        nazwa_wyscigu = dane[0][5]
-        data = dane[0][4]
+            nazwa_wyscigu = dane[0][5]
+            data = dane[0][4]
 
-        bg.add_widget(Label(text=f"Historia wyścigów: ",
-                            size_hint=(None, None),
-                            pos_hint={"x": 0.09, "y": 0.85},
-                            font_size="30",
-                            color=get_color_from_hex('#EF8B00')))
+            bg.add_widget(Label(text=f"Historia wyścigów: ",
+                                size_hint=(None, None),
+                                pos_hint={"x": 0.09, "y": 0.85},
+                                font_size="30",
+                                color=get_color_from_hex('#EF8B00')))
 
-        bg.add_widget(Label(text=f"Data: {data}",
-                            size_hint=(None, None),
-                            pos_hint={"x": 0.24, "y": 0.8},
-                            font_size="20",
-                            color=get_color_from_hex('#000000')))
+            bg.add_widget(Label(text=f"Data: {data}",
+                                size_hint=(None, None),
+                                pos_hint={"x": 0.24, "y": 0.8},
+                                font_size="20",
+                                color=get_color_from_hex('#000000')))
 
-        # Wyświetlanie tytułów tabeli:
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(110, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Model samochodu", size=(170, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(120, 35)))
-        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(130, 35)))
+            # Wyświetlanie tytułów tabeli:
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(110, 35)))
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Model samochodu", size=(170, 35)))
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(120, 35)))
+            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(130, 35)))
 
-        licznik = 0
-        for i in dane:
-            tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
-                           color=get_color_from_hex('ffffff'),
-                           size=(85, 35)))
-            tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][0]),
-                           color=get_color_from_hex('ffffff'),
-                           size=(110, 35)))
-            tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][1]),
-                           color=get_color_from_hex('ffffff'),
-                           size=(150, 35)))
-            tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]),
-                           color=get_color_from_hex('ffffff'),
-                           size=(170, 35)))
-            tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text="", color=get_color_from_hex('ffffff'),
-                           size=(120, 35)))
-            tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][3]),
-                           color=get_color_from_hex('ffffff'),
-                           size=(130, 35)))
+            licznik = 0
+            for i in dane:
+                tab.add_widget(
+                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
+                               color=get_color_from_hex('ffffff'),
+                               size=(85, 35)))
+                tab.add_widget(
+                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][0]),
+                               color=get_color_from_hex('ffffff'),
+                               size=(110, 35)))
+                tab.add_widget(
+                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][1]),
+                               color=get_color_from_hex('ffffff'),
+                               size=(150, 35)))
+                tab.add_widget(
+                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]),
+                               color=get_color_from_hex('ffffff'),
+                               size=(170, 35)))
+                tab.add_widget(
+                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text="", color=get_color_from_hex('ffffff'),
+                               size=(120, 35)))
+                tab.add_widget(
+                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][3]),
+                               color=get_color_from_hex('ffffff'),
+                               size=(130, 35)))
 
-            licznik += 1
+                licznik += 1
 
-        cursor.close()
-
+            cursor.close()
+        except IndexError:
+            self.error.open()
 
 
 
@@ -903,6 +920,7 @@ class PolaczRFID(Screen):
         connection = db.connect(user="postgres",
                                 password="postgres",
                                 database="lapify")
+
         text = text_input[number].text
 
         cursor = connection.cursor()
@@ -915,12 +933,13 @@ class PolaczRFID(Screen):
                        "where data_wyscigu = (select max(data_wyscigu) from wyscig)")
 
         b = cursor.fetchall()
-
+        print(b)
 
         cursor = connection.cursor()
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
                        (len(t) + 1, b[0], text_id[number], text))
-        # cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
+        #cursor.execute(f"UPDATE public.przypisanie SET rfid = %s WHERE id_kierowcy={text_id[number]} ; commit", [text])
+        print(text)
         cursor.close()
         connection.commit()
         connection.close()
