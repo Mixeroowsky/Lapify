@@ -665,7 +665,7 @@ class HistoriaWyscigu(Screen):
 
         bg.add_widget(Label(text=f"Data: {data}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.24, "y": 0.8},
+                            pos_hint={"x": 0.22, "y": 0.7},
                             font_size="20",
                             color=get_color_from_hex('#000000')))
 
