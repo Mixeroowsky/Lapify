@@ -14,7 +14,9 @@ Manager:
     DodajKierowce:
     Live:
     WynikiKierowcy:
+    WynikiKierowcy1:
     SzczegolyOkrazenia:
+    SzczegolyOkrazenia1:
     PoprzednieSesje:
     HistoriaWyscigu:
     Pomoc:
@@ -463,6 +465,120 @@ Manager:
                 on_release:
                     app.root.current = "live"
 
+<WynikiKierowcy1>:
+    name: "kierowca1"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaKierowca1.clear_widgets()
+        planszaKierowca1.clear_widgets()
+
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: planszaKierowca1
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaKierowca1
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Button:
+                size_hint: 0.1, 0.05
+                pos_hint:{"center_x":0.5,"y":0.13}
+                text: root.text2
+                on_release:
+                    app.root.current = "poprzednie"
+
+
 ######################################################
 <SzczegolyOkrazenia>:
     name: "okrazenie"
@@ -556,6 +672,119 @@ Manager:
                 text: root.text2
                 on_release:
                     app.root.current = "kierowca"
+
+<SzczegolyOkrazenia1>:
+    name: "okrazenie1"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaOkrazenia1.clear_widgets()
+        planszaOkrazenia1.clear_widgets()
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: planszaOkrazenia1
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaOkrazenia1
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Button:
+                size_hint: 0.1, 0.05
+                pos_hint:{"center_x":0.5,"y":0.13}
+                text: root.text2
+                on_release:
+                    app.root.current = "kierowca1"
+
 
 ######################################################
 <Pomoc>:
@@ -906,6 +1135,23 @@ Manager:
 	            font_size: '24'
 	            text: "Konfiguracja bramek czasowych"
 	            color: hex('#000000')
+            Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.58,"y":0.76}
+	            font_size: '24'
+	            text: "Numer portu: "
+	            color: hex('#000000')
+            TextInput:
+                id: port_number
+                size_hint: (None, None)
+                pos: 865,582
+                size: 50,30
+            Button:
+                size_hint: (None, None)
+                pos: 920,582
+                text: "OK"
+                size: 50,30
+                on_press: root.assign_port()
 	    FloatLayout:
 	        id: oknobramki
             GridLayout:      # Ciemna obwódka wokół tabeli
