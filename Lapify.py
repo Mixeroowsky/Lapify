@@ -36,6 +36,7 @@ Builder.load_string("""
   text: ""
   color: hex('#000000')
   bgcolor: hex('#FFFFFF')
+  font_name: 'graphics/Roboto-Light'
   canvas.before:
     Color:
       rgba: self.bgcolor
@@ -376,7 +377,7 @@ class Live(Screen):
 
         bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.06, "y": 0.835},
+                            pos_hint={"right": 0.5, "y": 0.835},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
@@ -808,7 +809,6 @@ class Rozpocznij(Screen):
     text2 = "Nazwa wyścigu:"
     text3 = "Dodaj kierowcę"
     text4 = "Wybierz kierowcę"
-
     def swap(self):
         Manager.transition = SwapTransition()
 
@@ -829,11 +829,10 @@ class Rozpocznij(Screen):
 
     def input(self):
         nazwa_wyscigu = self.ids.wyscig
-
         if nazwa_wyscigu.text == "":
             self.error.open()
-
         else:
+            self.manager.current = "dodaj"
             cursor = connection.cursor()
             cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
             rows = cursor.fetchall()
