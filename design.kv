@@ -309,6 +309,13 @@ Manager:
             text: "Polacz RFID"
             on_release:
                 app.root.current = "polaczRFID"
+	Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.25}
+            size_hint: 0.15, 0.1
+            text: "Zakoncz LIVE"
+            on_release:
+                app.root.current = "nowa"
 
 
     StackLayout:
