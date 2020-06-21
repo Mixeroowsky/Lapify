@@ -24,7 +24,8 @@ from kivy.lang import Builder
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
-#import serial
+from time import sleep
+import serial
 import threading
 
 # Żeby móc robić Labele z kolorowym tłem w pliku pythona:
@@ -230,7 +231,7 @@ class Startowa(Screen):
         self.manager.current = "nowa"
 
     def on_enter(self, *args):
-        Clock.schedule_once(self.skip, 5)
+        Clock.schedule_once(self.skip, 0)
 
 
 class NowaSesja(Screen):
@@ -899,6 +900,7 @@ class HistoriaWyscigu(Screen):
                 licznik += 1
 
             cursor.close()
+
         except IndexError:
             self.error.open()
 
@@ -1251,7 +1253,7 @@ def packet_receive():
     while 1:
         threading.Timer(5, clear_ping).start()
         if port_number == "":
-            time.sleep(1)
+            sleep(1)
         else:
             try:
                 data = ser.read()
