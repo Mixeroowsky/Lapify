@@ -89,7 +89,7 @@ wyscig = []
 sortowane_ok = []
 
 connection = db.connect(database="lapify", user="postgres", password="postgres")
-ser = serial.Serial('COM4', baudrate=9600, timeout=1)
+ser = serial.Serial('COM7', baudrate=9600, timeout=1)
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
@@ -159,8 +159,9 @@ class DatabaseConnecion:
             print("Error while connecting to PostgreSQL", error)
 
     def getData(self):
+        all_data = []
         # pobieranie danych do ostatniej sesji
-        data_command = "select  distinct p.id_ok, k.imie, k.nazwisko, k.model_samochodu, k.kategoria, (bramka3-bramka1) as okrazenie " \
+        data_command = "select  distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu, k.kategoria, (bramka3-bramka1) as okrazenie " \
                        "from  przejazd p join " \
                        "(select id_ok, czas as bramka1 from przejazd where id_bramki = 1 )a " \
                        "on p.id_ok = a.id_ok " \
@@ -178,10 +179,27 @@ class DatabaseConnecion:
 
         all_data = self.cursor.fetchall()
 
-        licznik = 0
-        for a in all_data:
-            okrazenie.append((a[0], a[1], a[2], a[3], a[4], a[5]))
+        unikalne_id = []
+        unikalny_kierowca = []
 
+        for i in range(0, len(all_data)):
+            if all_data[i][0] not in unikalne_id:
+                unikalne_id.append(all_data[i][0])
+                unikalny_kierowca.append(all_data[i])
+                continue
+            else:
+                for j in range(0, i):
+                    if all_data[i][0] == unikalny_kierowca[j][0] \
+                            and all_data[i][5] < unikalny_kierowca[j][5]: #6 kolumna
+                        unikalny_kierowca[j] = all_data[i]
+                        continue
+
+
+        licznik = 0
+        for a in unikalny_kierowca:
+                okrazenie.append((a[0], a[1], a[2], a[3], a[4], a[5]))
+
+        print (unikalny_kierowca)
         # pobieranie danych o ostatnim wyscigu
 
     def getWyscig(self):
@@ -237,8 +255,9 @@ class NowaSesja(Screen):
                                font_size="15",
                                color=get_color_from_hex('#EF8B00')))
 
-        licznik = 0
+        """licznik = 0
         sortowane_ok.clear()  # Czyszczenie listy przed aktualizacją danych
+        
         for i in okrazenie:  # Wprowadzanie nowych danych do listy
             wartosc = str(okrazenie[licznik][5])  # wartosc służy do sortowania
 
@@ -252,10 +271,12 @@ class NowaSesja(Screen):
                                  okrazenie[licznik][2],
                                  okrazenie[licznik][3],
                                  okrazenie[licznik][4],
-                                 wartosc))
-            licznik += 1
+                                 wartosc
+                                 ))
+            licznik += 1"""
 
-        sortowanie = sorted(sortowane_ok, key=lambda data: data[5])  # Lista posortowana wg wartosci
+
+        sortowanie = sorted(okrazenie, key=lambda data: data[5])  # Lista posortowana wg wartosci
 
         # Wyświetlanie tytułów tabeli:
 
@@ -285,6 +306,7 @@ class NowaSesja(Screen):
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
                                          color=get_color_from_hex('ffffff'), text=sortowanie[licznik][4],
                                          size=(125, 35)))
+
             tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
                                          color=get_color_from_hex('ffffff'), text=str(sortowanie[licznik][5]),
                                          size=(90, 35)))
@@ -639,6 +661,7 @@ class HistoriaWyscigu(Screen):
     def generuj(self):
         tab = self.ids.tabelaHistoria
         bg = self.ids.oknoHistoria
+        dejtaSajens = []
 
         connection = db.connect(user="postgres",
                                 password="postgres",
@@ -646,16 +669,49 @@ class HistoriaWyscigu(Screen):
 
         cursor = connection.cursor()
 
-        cursor.execute("SELECT k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu\
-                        FROM public.kierowca AS k\
-                        JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
-                        JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu"
-                       f"    where w.id_wyscigu = {number} ;")
+        cursor.execute(f"select distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,\
+                       (bramkaKoniec-bramkaPoczatek) as okrazenie, k.kategoria, w.nazwa_wyscigu, w.data_wyscigu \
+                       from kierowca k \
+                       join przypisanie r on k.id_kierowcy = r.id_kierowcy  \
+                       join przejazd p on r.id_przypisania = p.id_przypisania \
+                       join (select id_ok, czas as bramkaPoczatek from przejazd \
+                       where id_bramki = (select min(distinct id_bramki) from przejazd \
+                       join przypisanie on przejazd.id_przypisania = przypisanie.id_przypisania \
+                       join wyscig on przypisanie.id_wyscigu = wyscig.id_wyscigu \
+                       where public.wyscig.id_wyscigu = {number}) )a  \
+                       on p.id_ok = a.id_ok \
+                       join (select id_ok, czas as bramkaKoniec from przejazd  \
+                       where id_bramki = (select max(distinct id_bramki) from przejazd \
+                       join przypisanie on przejazd.id_przypisania = przypisanie.id_przypisania \
+                       join wyscig on przypisanie.id_wyscigu = wyscig.id_wyscigu \
+                       where public.wyscig.id_wyscigu ={number}) )b  \
+                       on b.id_ok = p.id_ok  \
+                       join wyscig w  on r.id_wyscigu = w.id_wyscigu \
+                       where w.id_wyscigu = {number}; ")
 
-        dane = cursor.fetchall()
+        dejtaSajens.clear()
+        dejtaSajens = cursor.fetchall()
 
-        nazwa_wyscigu = dane[0][5]
-        data = dane[0][4]
+        unikalne_id = []
+        unikalny_kierowca = []
+
+        for i in range(0, len(dejtaSajens)):
+            if dejtaSajens[i][0] not in unikalne_id:
+                unikalne_id.append(dejtaSajens[i][0])
+                unikalny_kierowca.append(dejtaSajens[i])
+                continue
+            else:
+                for j in range(0, i):
+                    if dejtaSajens[i][0] == unikalny_kierowca[j][0] \
+                            and dejtaSajens[i][4] < unikalny_kierowca[j][4]:  # 5 kolumna
+                        unikalny_kierowca[j] = dejtaSajens[i]
+                        continue
+
+        sortowane = sorted(unikalny_kierowca, key=lambda data: data[4])  # Lista posortowana wg wartosci
+
+
+        nazwa_wyscigu = dejtaSajens[0][1]
+        data = dejtaSajens[0][7]
 
         bg.add_widget(Label(text=f"Historia wyścigów: ",
                             size_hint=(None, None),
@@ -678,28 +734,29 @@ class HistoriaWyscigu(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(130, 35)))
 
         licznik = 0
-        for i in dane:
+        for i in sortowane:
             tab.add_widget(
                 PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
                            color=get_color_from_hex('ffffff'),
                            size=(85, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][0]),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(sortowane[licznik][1]),
                            color=get_color_from_hex('ffffff'),
                            size=(110, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][1]),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(sortowane[licznik][2]),
                            color=get_color_from_hex('ffffff'),
                            size=(150, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(sortowane[licznik][3]),
                            color=get_color_from_hex('ffffff'),
                            size=(170, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text="", color=get_color_from_hex('ffffff'),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(sortowane[licznik][4]),
+                           color=get_color_from_hex('ffffff'),
                            size=(120, 35)))
             tab.add_widget(
-                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][3]),
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(sortowane[licznik][5]),
                            color=get_color_from_hex('ffffff'),
                            size=(130, 35)))
 
@@ -822,13 +879,17 @@ class Rozpocznij(Screen):
                   size_hint=(None, None), size=(220, 100),
                   auto_dismiss=False,
                   separator_color=[38 / 255., 38 / 255., 38 / 255., 1.])
-    content.bind(on_release=error.dismiss)
+
+    content.bind(on_release = error.dismiss)
+
+
 
     def input(self):
         nazwa_wyscigu = self.ids.wyscig
 
         if nazwa_wyscigu.text == "":
             self.error.open()
+
         else:
             cursor = connection.cursor()
             cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
@@ -836,6 +897,7 @@ class Rozpocznij(Screen):
             cursor.execute("insert into wyscig (id_wyscigu, nazwa_wyscigu, data_wyscigu ) values (%s, %s, %s);commit",
                            (len(rows) + 1, nazwa_wyscigu.text, date.today()))
             cursor.close()
+
 
     def unswap(self):
         Manager.transition = NoTransition()
