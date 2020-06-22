@@ -207,7 +207,7 @@ class DatabaseConnecion:
                        "on przy.id_kierowcy = k.id_kierowcy " \
                        "join wyscig w " \
                        "on przy.id_wyscigu = w.id_wyscigu " \
-                       "where w.data_wyscigu=(select max(data_wyscigu) from wyscig) ; "
+                       "where w.id_wyscigu=(select max(id_wyscigu) from wyscig) ; "
         self.cursor.execute(data_command)
 
         all_data = self.cursor.fetchall()
@@ -293,14 +293,14 @@ class NowaSesja(Screen):
 
         # Wyświetlanie tytułów tabeli:
 
-        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Miejsce", size=(70, 35)))
-        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Imie", size=(120, 35)))
-        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Nazwisko", size=(150, 35)))
+        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(70, 35)))
+        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(120, 35)))
+        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
         tabela.add_widget(
-            PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="      Model \nsamochodu", size=(170, 35)))
-        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Kategoria", size=(125, 35)))
+            PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="      Model \nsamochodu", size=(170, 35)))
+        tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(125, 35)))
         tabela.add_widget(
-            PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="    Czas \nokrazenia", size=(90, 35)))
+            PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="    Czas \nokrążenia", size=(90, 35)))
 
         #wstawianie danych do tabeli
 
@@ -336,6 +336,7 @@ class NowyKierowca(Screen):
 class Live(Screen):
     text1 = "Strona główna"
     text2 = "Dodaj kierowcę"
+    text3 = "Połącz RFID"
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
@@ -364,17 +365,17 @@ class Live(Screen):
                        where id_bramki = (select min(distinct id_bramki) from przejazd \
                        join przypisanie on przejazd.id_przypisania = przypisanie.id_przypisania \
                        join wyscig on przypisanie.id_wyscigu = wyscig.id_wyscigu \
-                       where wyscig.data_wyscigu=(select max(data_wyscigu) from wyscig)) )a  \
+                       where wyscig.id_wyscigu=(select max(id_wyscigu) from wyscig)) )a  \
                        on p.id_ok = a.id_ok  \
                        join (select id_ok, czas as bramkaKoniec from przejazd  \
                        where id_bramki = (select max(distinct id_bramki) from przejazd \
                        join przypisanie on przejazd.id_przypisania = przypisanie.id_przypisania \
                        join wyscig on przypisanie.id_wyscigu = wyscig.id_wyscigu \
-                       where wyscig.data_wyscigu=(select max(data_wyscigu) from wyscig)) )b  \
+                       where wyscig.id_wyscigu=(select max(id_wyscigu) from wyscig)) )b  \
                        on b.id_ok = p.id_ok  \
                        join wyscig w  \
                        on r.id_wyscigu = w.id_wyscigu  \
-                       where w.data_wyscigu=(select max(data_wyscigu) from wyscig) ; "
+                       where w.id_wyscigu=(select max(id_wyscigu) from wyscig) ; "
 
         cursor.execute(data_command)
 
@@ -481,7 +482,7 @@ class WynikiKierowcy(Screen):
                        on b.id_ok = p.id_ok  \
                        join wyscig w  \
                        on r.id_wyscigu = w.id_wyscigu  \
-                       where w.data_wyscigu=(select max(data_wyscigu) from wyscig) \
+                       where w.id_wyscigu=(select max(id_wyscigu) from wyscig) \
                        AND k.id_kierowcy = {number};"
 
         cursor.execute(data_command)
@@ -614,7 +615,7 @@ class SzczegolyOkrazenia(Screen):
                                JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
                                JOIN public.przejazd AS r ON p.id_przypisania = r.id_przypisania\
                                JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu\
-                               WHERE data_wyscigu =  (select max(data_wyscigu) from wyscig)\
+                               WHERE w.id_wyscigu =  (select max(id_wyscigu) from wyscig)\
                                AND r.id_ok = {inside_number};"
                        )
 
@@ -1172,7 +1173,7 @@ class PolaczRFID(Screen): #polaczenie rfid z kierowcami
         cursor = connection.cursor()
         cursor.execute("select id_wyscigu " \
                        "from wyscig " \
-                       "where data_wyscigu = (select max(data_wyscigu) from wyscig)")
+                       "order by id_wyscigu desc limit 1 ")
 
         b = cursor.fetchall()
 
@@ -1263,7 +1264,7 @@ class DodajKierowce(Screen):
         rows = cursor.fetchall()
 
         cursor = connection.cursor()
-        cursor.execute("SELECT id_wyscigu FROM wyscig WHERE data_wyscigu = (select max(data_wyscigu) from wyscig) ")
+        cursor.execute("SELECT id_wyscigu FROM wyscig WHERE id_wyscigu = (select max(id_wyscigu) from wyscig) ")
         b = cursor.fetchall()
 
         cursor = connection.cursor()
@@ -1322,7 +1323,7 @@ def packet_receive():
                         timestamp_minutes = (timestamp * 60) % 60
                         timestamp_seconds = (timestamp * 3600) % 60
                         time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
-                        print(time)
+
                         rfid_tag = str(buffor[14:22])
                         nr_bramki = str(buffor[2:10])
 
