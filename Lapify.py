@@ -94,7 +94,8 @@ ser = serial.Serial('COM7', baudrate=9600, timeout=1)
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
 
-
+"""StartButton, KontrolnyButton, MetaButton - klasy przycisków 
+z widoku konfiguracji bramek przy przychodzących pakietach."""
 class StartButton(Button):
     pass
 
@@ -142,7 +143,7 @@ class SelectableButton(RecycleDataViewBehavior, Button):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
 
-
+"""Klasa DatabaseConnection - połączenie z bazą danych i błąd połączenia z bazą danych"""
 class DatabaseConnecion:
     def __init__(self):
         try:
@@ -157,7 +158,9 @@ class DatabaseConnecion:
 
         except (Exception, db.Error) as error:
             print("Error while connecting to PostgreSQL", error)
-
+#getData- pobieranie z bazy danych tabeli na Stronie Głównej,
+   #sortowanie kierowców i wyświetlanie najlepszego czasu dla
+   #danego kierowcy
     def getData(self):
         all_data = []
         # pobieranie danych do ostatniej sesji
@@ -199,7 +202,7 @@ class DatabaseConnecion:
         for a in unikalny_kierowca:
                 okrazenie.append((a[0], a[1], a[2], a[3], a[4], a[5]))
 
-        print (unikalny_kierowca)
+
         # pobieranie danych o ostatnim wyscigu
 
     def getWyscig(self):
@@ -255,26 +258,6 @@ class NowaSesja(Screen):
                                font_size="15",
                                color=get_color_from_hex('#EF8B00')))
 
-        """licznik = 0
-        sortowane_ok.clear()  # Czyszczenie listy przed aktualizacją danych
-        
-        for i in okrazenie:  # Wprowadzanie nowych danych do listy
-            wartosc = str(okrazenie[licznik][5])  # wartosc służy do sortowania
-
-            try:
-                wartosc = wartosc.replace(":", "")  # Wywalamy dwukropki z czasu
-                wartosc = int(wartosc)  # Zmieniamy string w liczbe
-            except ValueError:
-                wartosc = 9999  # Jak ktoś złe dane wprowadzi
-            sortowane_ok.append((okrazenie[licznik][0],
-                                 okrazenie[licznik][1],
-                                 okrazenie[licznik][2],
-                                 okrazenie[licznik][3],
-                                 okrazenie[licznik][4],
-                                 wartosc
-                                 ))
-            licznik += 1"""
-
 
         sortowanie = sorted(okrazenie, key=lambda data: data[5])  # Lista posortowana wg wartosci
 
@@ -288,6 +271,8 @@ class NowaSesja(Screen):
         tabela.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="Kategoria", size=(125, 35)))
         tabela.add_widget(
             PoleTabeli(bgcolor=get_color_from_hex('#E27814'), text="    Czas \nokrazenia", size=(90, 35)))
+
+        #wstawianie danych do tabeli
 
         licznik = 0
         all = len(okrazenie)
@@ -581,13 +566,13 @@ class SzczegolyOkrazenia(Screen):
         cursor.close()
         wyniki.clear()
 
-
+#Zakładka Poprzednie Sesje - Historia wyscigów
 class PoprzednieSesje(Screen):
     text1 = "Strona główna"
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
-
+#tworzenie tabeli Historia wyścigów
     def generuj(self):
         tab = self.ids.tabelaPoprzednie
         bg = self.ids.oknoPoprzednie
@@ -612,7 +597,7 @@ class PoprzednieSesje(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwa wyścigu", size=(300, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Data wyścigu", size=(157, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(120, 35)))
-
+        #wstawianie wartości do tabeli
         licznik = 0
         for i in dane:
             tab.add_widget(
@@ -657,7 +642,7 @@ class HistoriaWyscigu(Screen):
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
-
+    #tworzenie szczegółowych danych po kliknięciu przycisku "Więcej" w Poprzedniej Sesji
     def generuj(self):
         tab = self.ids.tabelaHistoria
         bg = self.ids.oknoHistoria
@@ -694,7 +679,7 @@ class HistoriaWyscigu(Screen):
 
         unikalne_id = []
         unikalny_kierowca = []
-
+#szukanie najlepszych czasów dla konkretnego kierowcy
         for i in range(0, len(dejtaSajens)):
             if dejtaSajens[i][0] not in unikalne_id:
                 unikalne_id.append(dejtaSajens[i][0])
@@ -732,7 +717,7 @@ class HistoriaWyscigu(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Model samochodu", size=(170, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(120, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(130, 35)))
-
+        #wstawianie wartości do tabeli
         licznik = 0
         for i in sortowane:
             tab.add_widget(
@@ -766,7 +751,7 @@ class HistoriaWyscigu(Screen):
 
 
 
-
+#tworzenie Okna Konfiguracji Bramek
 class Bramki(Screen):
     def swap(self):
         Manager.transition = SwapTransition()
@@ -779,13 +764,13 @@ class Bramki(Screen):
 
     def unfade(self):
         Manager.transition = NoTransition()
-
+#tworzenie tabeli konfiguracja bramek
     def generuj(self):
         tab = self.ids.tabelabramki
         tab.clear_widgets()
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przychodzące pakiety", size=(471, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przypisz", size=(390, 35)))
-
+#Przypisywanie pakietów do Startu, Punktów kontrolnych i Mety
     def add_tag_id(self):
         global number
         global ping
@@ -806,7 +791,7 @@ class Bramki(Screen):
             tag_list.add_widget(
                 MetaButton(text="Meta", id=f"{i}", size_hint=(None, None), size=(129, 35),
                            on_release=lambda x: self.updateMeta()))
-
+#przypisywanie do pakietu do Startu
     def updateStart(self):
         global number
         global ping
@@ -824,7 +809,7 @@ class Bramki(Screen):
         cursor.close()
         connection.commit()
         connection.close()
-
+#przypisywanie pakietów do Punktów kontrolnych
     def updateKontrolny(self):
         global number
         global ping
@@ -841,7 +826,7 @@ class Bramki(Screen):
         cursor.close()
         connection.commit()
         connection.close()
-
+#przypisywanie pakietu do mety
     def updateMeta(self):
         global number
         global ping
