@@ -24,7 +24,7 @@ from kivy.lang import Builder
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
-#import serial
+import serial
 import threading
 
 # Żeby móc robić Labele z kolorowym tłem w pliku pythona:
@@ -897,6 +897,7 @@ class HistoriaWyscigu(Screen):
                                                id=int(dane[licznik][0]),race_id=int(dane[licznik][7])))
 
                 licznik += 1
+
 
             cursor.close()
         except IndexError:
