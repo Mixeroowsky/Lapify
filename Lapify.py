@@ -867,15 +867,12 @@ class Rozpocznij(Screen):
 
     content.bind(on_release = error.dismiss)
 
-
-
     def input(self):
         nazwa_wyscigu = self.ids.wyscig
-
         if nazwa_wyscigu.text == "":
             self.error.open()
-
         else:
+            self.manager.current = "dodaj"
             cursor = connection.cursor()
             cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
             rows = cursor.fetchall()
