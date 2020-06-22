@@ -1165,28 +1165,20 @@ Manager:
                     Rectangle:
                         pos: self.pos
                         size: self.size
-            ScrollView:
-                size_hint:(0.689,.581)
-                do_scroll_x: False
-                do_scroll_y: True
-                pos_hint:{"x":0.151,"y":0.22}
-                bar_width: 16
-                bar_color: 5, 10, 15, .8
-                bar_inactive_color: 5, 20, 10, .5
-                scroll_type: ['bars']
-                StackLayout:      # Tabela
-                    id: tabelabramki
-                    orientation: 'lr-tb'
-                    spacing: [1,1]
-                    size_hint: (None,None)
-                    size: (862,1000)
-                    pos_hint:{"x":0.1507,"y":0.216}
-                    canvas:
-                        Color:
-                            rgba: hex('#606060')
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
+
+            StackLayout:      # Tabela
+                id: tabelabramki
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (862,420)
+                pos_hint:{"x":0.152,"y":0.22}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
             GridLayout:
                 cols: 1
                 size_hint: (None,None)
@@ -1568,3 +1560,4 @@ Manager:
 	            text: "Wroc"
 	            on_release:
 	                app.root.current = "live"
+
