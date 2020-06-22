@@ -6,7 +6,9 @@ import time
 from enum import Enum
 
 packet_num = 0
-ser = serial.Serial('COM8', baudrate=9600, timeout=1)
+
+ser = serial.Serial('COM5', baudrate=9600, timeout=1)
+
 
 
 class Type(Enum):
@@ -123,8 +125,9 @@ while True:
     proximity_finish = generate_packet_finish(Type.proximity, gps)
     ping_finish = generate_packet_finish(Type.ping, gps)
     reset = False
+    race = True
 
-    if i == 10:
+    if i == 10 and race is True:
         print(f"\nPakiety {j} (start):")
         print(generate_packet_start(Type.proximity, gps))
         ser.write((proximity_start + '\r').encode())
@@ -138,8 +141,9 @@ while True:
         ser.write((ping_finish + '\r').encode())
         ser.reset_input_buffer()
 
-<<<<<<< HEAD
-    elif i == 20:
+
+    elif i == 20 and race is True:
+
         print(f"\nPakiety {j} (checkpoint):")
         print(generate_packet_start(Type.ping,gps))
         ser.write((ping_start + '\r').encode())
@@ -151,68 +155,14 @@ while True:
         time.sleep(0.2)
         print(generate_packet_finish(Type.ping,gps))
         ser.write((ping_finish + '\r').encode())
-=======
+
     photocell2 = generate_packet2(Type.photocell, gps)
     proximity2 = generate_packet2(Type.proximity, gps)
     ping2 = generate_packet2(Type.ping, gps)
 
-    if (i % 20 == 0):
-        print(generate_packet(Type.photocell, gps))
-        print(generate_packet2(Type.photocell, gps))
-        ser.write((photocell + '\r').encode())
-        ser.write((photocell2 + '\r').encode())
-        ser.reset_input_buffer()
-    elif (i % 10 == 0):
-        print(generate_packet(Type.proximity, gps))
-        print(generate_packet2(Type.proximity, gps))
-        ser.write((proximity + '\r').encode())
-        ser.write((proximity2 + '\r').encode())
->>>>>>> Ania
-        ser.reset_input_buffer()
 
-    elif i == 30:
-        print(f"\nPakiety {j} (finish):")
-        print(generate_packet_start(Type.ping,gps))
-        ser.write((ping_start + '\r').encode())
-        ser.reset_input_buffer()
-        time.sleep(0.2)
-        print(generate_packet_checkpoint(Type.ping,gps))
-        ser.write((ping_checkpoint + '\r').encode())
-        ser.reset_input_buffer()
-        time.sleep(0.2)
-        print(generate_packet_finish(Type.proximity, gps))
-        ser.write((proximity_finish + '\r').encode())
-        ser.reset_input_buffer()
 
-        reset = True
+    ser.reset_input_buffer()
 
-    else:
-<<<<<<< HEAD
-        print(f"\nPakiety {j} (ping):")
-        print(generate_packet_start(Type.ping,gps))
-        ser.write((ping_start + '\r').encode())
-        ser.reset_input_buffer()
-        time.sleep(0.2)
-        print(generate_packet_checkpoint(Type.ping,gps))
-        ser.write((ping_checkpoint + '\r').encode())
-        ser.reset_input_buffer()
-        time.sleep(0.2)
-        print(generate_packet_finish(Type.ping,gps))
-        ser.write((ping_finish + '\r').encode())
-=======
-        print(generate_packet(Type.ping,gps))
-        print(generate_packet2(Type.ping, gps))
-        ser.write((ping + '\r').encode())
-        ser.write((ping2 + '\r').encode())
->>>>>>> Ania
-        ser.reset_input_buffer()
 
-    if reset is True:
-        i = 0
 
-    time.sleep(random.randint(1, 11) / 10)
-    i += 1
-    j += 1
-
-    # if i > 10:
-    #    gps = GPS.lost

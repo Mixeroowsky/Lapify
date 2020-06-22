@@ -22,6 +22,7 @@ from kivy.utils import get_color_from_hex
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
 from kivy.uix.button import Button
+from time import sleep
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 import serial
@@ -89,7 +90,9 @@ wyscig = []
 sortowane_ok = []
 
 connection = db.connect(database="lapify", user="postgres", password="postgres")
-ser = serial.Serial('COM7', baudrate=9600, timeout=1)
+
+port_number = ""
+
 
 class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
     bgcolor = ObjectProperty(None)
@@ -99,8 +102,10 @@ z widoku konfiguracji bramek przy przychodzących pakietach."""
 class StartButton(Button):
     pass
 
+
 class KontrolnyButton(Button):
     pass
+
 
 class MetaButton(Button):
     pass
@@ -764,7 +769,19 @@ class Bramki(Screen):
 
     def unfade(self):
         Manager.transition = NoTransition()
-#tworzenie tabeli konfiguracja bramek
+
+
+
+
+    def assign_port(self):
+        global port_number
+        port_number = self.ids.port_number.text
+        global ser
+        try:
+            ser = serial.Serial(f'COM{port_number}', baudrate=9600, timeout=1)
+        except serial.SerialException as ex:
+            print("Error! No such serial port")
+# tworzenie tabeli konfiguracja bramek
     def generuj(self):
         tab = self.ids.tabelabramki
         tab.clear_widgets()
@@ -966,7 +983,6 @@ class PolaczRFID(Screen):
 
         b = cursor.fetchall()
 
-
         cursor = connection.cursor()
         cursor.execute("INSERT INTO przypisanie (id_przypisania, id_wyscigu, id_kierowcy, rfid) VALUES (%s,%s,%s,%s)",
                        (len(t) + 1, b[0], text_id[number], text))
@@ -1072,31 +1088,79 @@ class LapifyApp(App):
     def build(self):
         return kv
 
+
 thread_stop = False
 
 ping = []
 
+
+def clear_ping():
+    global ping
+    ping.clear()
+
+
 def packet_receive():
     buffor = ""
+    global port_number
     while 1:
-        data = ser.read()
-        if len(data) != 0 and ord(data) >= 32 and ord(data) <= 128:
-            buffor += str(data.decode('utf-8'))
-        elif (data == b'\r' or data == b'\n') and len(buffor) == 34:
-            if buffor[12:14] == '01':
-                global ping
-                if buffor[2:10] not in ping:
-                    ping.append(buffor[2:10])
+        threading.Timer(5, clear_ping).start()
+        if port_number == "":
+            sleep(1)
+        else:
+            try:
+                data = ser.read()
+                if len(data) != 0 and ord(data) >= 32 and ord(data) <= 128:
+                    buffor += str(data.decode('utf-8'))
+                elif (data == b'\r' or data == b'\n') and len(buffor) == 34:
+                    if buffor[12:14] == '01':
+                        global ping
+                        if buffor[2:10] not in ping:
+                            ping.append(buffor[2:10])
 
-            elif buffor[12:14] == '02':
-                timestamp = buffor[22:30]
-                timestamp = int(timestamp, 16) / 3600000
-                timestamp_hours = int(timestamp)
-                timestamp_minutes = (timestamp * 60) % 60
-                timestamp_seconds = (timestamp * 3600) % 60
-                time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
-                print(time)
-            buffor = ""
+                    elif buffor[12:14] == '02':
+                        timestamp = buffor[22:30]
+                        timestamp = int(timestamp, 16) / 3600000
+                        timestamp_hours = int(timestamp)
+                        timestamp_minutes = (timestamp * 60) % 60
+                        timestamp_seconds = (timestamp * 3600) % 60
+                        time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
+                        print(time)
+                        rfid_tag = str(buffor[14:22])
+                        nr_bramki = str(buffor[2:10])
+
+                        cursor = connection.cursor()
+
+                        cursor.execute("SELECT id_przejazdu FROM przejazd ")
+                        rows = cursor.fetchall()
+
+                        cursor.execute("SELECT id_przypisania from przypisanie"
+                                       " where rfid = '%s' " % rfid_tag)
+                        id_przypisania = cursor.fetchall()
+
+                        cursor.execute("SELECT id_bramki from bramka"
+                                       " where nr_bramki = '%s' " % nr_bramki)
+                        id_bramki = cursor.fetchall()
+
+                        cursor.execute("SELECT id_bramki FROM przejazd ORDER BY id_przejazdu desc LIMIT 1")
+                        ostatnia_bramka = cursor.fetchall()
+
+                        cursor.execute("SELECT id_ok FROM przejazd order by id_przejazdu desc limit 1 ")
+                        next_ok = cursor.fetchall()
+                        if ostatnia_bramka[0][0] == 3:
+                            a = next_ok[0][0]
+                            a += 1
+                            cursor.execute(
+                                " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s)",
+                                (len(rows) + 1, a, id_przypisania[0], id_bramki[0], time))
+
+                        else:
+                            cursor.execute(
+                                " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s)",
+                                (len(rows) + 1, next_ok[0], id_przypisania[0], id_bramki[0], time))
+
+                    buffor = ""
+            except:
+                "Error with data read"
         if thread_stop:
             break
 
@@ -1104,7 +1168,6 @@ def packet_receive():
 def receive_thread():
     thread = threading.Thread(target=packet_receive)
     thread.start()
-
 
 
 if __name__ == '__main__':
