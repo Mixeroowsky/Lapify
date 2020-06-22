@@ -1,6 +1,6 @@
 import serial
 
-ser = serial.Serial('COM4', baudrate=9600, timeout=1)
+ser = serial.Serial('COM6', baudrate=9600, timeout=1)
 buffor = ""
 while 1:
     data = ser.read()

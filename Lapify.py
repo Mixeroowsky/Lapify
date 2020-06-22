@@ -6,6 +6,7 @@ Config.set('graphics', 'height', '720')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 # Config.set('kivy', 'exit_on_escape', '0')
 import psycopg2 as db
+from time import sleep
 from _datetime import datetime, date
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import BooleanProperty
@@ -27,8 +28,7 @@ from kivy.uix.popup import Popup
 import serial
 import threading
 
-# Żeby móc robić Labele z kolorowym tłem w pliku pythona:
-# Nwm czemu muszą być takie małe wcięcia ale inaczej nie działa XD
+# Tworzenie własnych labeli oraz przycisków w języku kv:
 Builder.load_string("""       
 <PoleTabeli>:
   size_hint: (None, None)
@@ -78,35 +78,54 @@ Builder.load_string("""
     app.root.switch(self.id)
 """)
 
+# Zmienne globalne wykorzystywane do przenoszenia danych pomiędzy oknami aplikacji
 number = 0
 number_update = 0
 inside_number = 0
 enum_number = 0
 
-dane = []  # Przyda sie potem
+# Zmienne globalne wykorzystywane przy odczycie danych i wykrywaniu niedziałających bramek
+missing_bramka = ""
+bramka_error = False
+thread_stop = False
+ping = []
+bramki_wyscigu = []
+obecne_pingi = []
+pakiet_mety = ""
+meta = ""
+ser = serial.Serial()
+
+# Tabele wykorzystywane przy wyświetlaniu danych z bazy
+dane = []
 okrazenie = []
 wyscig = []
 sortowane_ok = []
 
+# Połączenie z bazą danych
 connection = db.connect(database="lapify", user="postgres", password="postgres")
 
+# Numer portu COM
 port_number = ""
 
+# Zmienna określająca czy wyścig został skonfigurowany i obecnie trwa
+rozpoczety = False
 
-class PoleTabeli(Label):  # Kolorowy Label, polecam do tabelek
+
+# Deklaracja własnych labeli oraz przycisków stworzonych w języku kv
+class PoleTabeli(Label):
     bgcolor = ObjectProperty(None)
 
 
 class StartButton(Button):
-    pass
+    id = ObjectProperty(None)
 
 
 class KontrolnyButton(Button):
-    pass
+    id = ObjectProperty(None)
 
 
 class MetaButton(Button):
-    pass
+    id = ObjectProperty(None)
 
 
 class PolaczButton(Button):
@@ -205,7 +224,7 @@ class Startowa(Screen):
         self.manager.current = "nowa"
 
     def on_enter(self, *args):
-        Clock.schedule_once(self.skip, 5)
+        Clock.schedule_once(self.skip, 1)
 
 
 class NowaSesja(Screen):
@@ -215,7 +234,8 @@ class NowaSesja(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
-    def fade(self):  # Żeby fade był tylko przy okienku Rozpocznij
+# Funkcje pozwalające na zmianę animacji przejścia pomiędzy oknami
+    def fade(self):
         Manager.transition = FadeTransition()
 
     def unfade(self):
@@ -223,6 +243,7 @@ class NowaSesja(Screen):
 
     # dane do tabeli
     def generujtabele(self):
+        # Odwołanie do elementów z pliku .kv
         tabela = self.ids.tabelaOstatniaSesja
         ekran = self.ids.p_ostatnia_sesja
 
@@ -303,23 +324,44 @@ class NowyKierowca(Screen):
 class Live(Screen):
     text1 = "Strona główna"
     text2 = "Dodaj kierowcę"
+    text3 = "Połącz z RFID"
+    text4 = "Zakończ wyścig"
+    global missing_bramka
+    global bramka_error_text
+    global rozpoczety
+    database_live_data = []
+
+    # Funkcja wyłączająca pojawianie się okna błędu komunikacji z bramką
+    def reconnect(instance):
+        global bramka_error
+        bramka_error = False
+
+    # Okno błędu komunikacji z bramką
+    content = Button(text='OK',
+                     background_down='graphics/pressed.png')
+
+    conn_error_popup = Popup(title_align='center',
+                             title_size=16,
+                             content=content,
+                             size_hint=(None, None), size=(320, 100),
+                             auto_dismiss=False,
+                             separator_color=[38 / 255., 38 / 255., 38 / 255., 1.])
+    content.bind(on_release=conn_error_popup.dismiss)
+    content.bind(on_release=reconnect)
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
-    def fade(self):  # Żeby fade był tylko przy okienku Rozpocznij
+    # Funkcje pozwalające na zmianę animacji przejścia pomiędzy oknami
+    def fade(self):
         Manager.transition = FadeTransition()
 
     def unfade(self):
         Manager.transition = NoTransition()
 
-    def generuj(self):  # Funkcja co nam wypełnia tabele
-        tab = self.ids.tabelaLive  # Layout tabeli
-        bg = self.ids.plansza  # Layout Ekranu
-        dejtaSajens = []
-
+    # Funkcja pobierająca z bazy dane dotyczące trwającego wyścigu
+    def database_get_live(self):
         cursor = connection.cursor()
-
         data_command = "select distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,\
                        (bramkaKoniec-bramkaPoczatek) as okrazenie, k.kategoria, r.rfid \
                        from kierowca k \
@@ -344,47 +386,86 @@ class Live(Screen):
                        where w.data_wyscigu=(select max(data_wyscigu) from wyscig) ; "
 
         cursor.execute(data_command)
+        self.database_live_data.clear()
+        self.database_live_data = cursor.fetchall()
+        cursor.close()
 
-        dejtaSajens.clear()
-        dejtaSajens = cursor.fetchall()
+    # Funkcja wywoływana cyklicznie co 2 sekundy, sprawdza stan połączenia z bramkami oraz odświeża
+    # wyniki w tabeli po zakończeniu okrążenia przez kierowcę
+    def connection_check(self, *args):
+        global pakiet_mety
+        if pakiet_mety == meta and bramka_error is False and self.manager.current == "live":
+            self.database_get_live()
+            self.manager.current = "refresh"
+            pakiet_mety = ""
+        if bramka_error is True:
+            self.conn_error_popup.title = "Bramka " + missing_bramka + " nie odpowiada!"
+            self.conn_error_popup.open()
 
-        unikalne_id = []
-        unikalny_kierowca = []
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca zawartość tabel oraz nazwę wyścigu
+    def generuj(self):
+        # Odwołanie do elementów z pliku .kv
+        tab = self.ids.tabelaLive  # Layout tabeli
+        background = self.ids.plansza  # Layout Ekranu
+        sortowane = []
 
-        for i in range(0, len(dejtaSajens)):
-            if dejtaSajens[i][0] not in unikalne_id:
-                unikalne_id.append(dejtaSajens[i][0])
-                unikalny_kierowca.append(dejtaSajens[i])
-                continue
-            else:
-                for j in range(0, i):
-                    if dejtaSajens[i][0] == unikalny_kierowca[j][0] \
-                            and dejtaSajens[i][4] < unikalny_kierowca[j][4]:
-                        unikalny_kierowca[j] = dejtaSajens[i]
-                        continue
+        cursor = connection.cursor()
 
-        sortowane = sorted(unikalny_kierowca, key=lambda data: data[4])  # Lista posortowana wg wartosci
+        if rozpoczety is True:
+            # Timer wywołujący co 2 sekundy funkcję connection_check
+            Clock.schedule_interval(self.connection_check, 2)
 
-        nazwa_wyscigu = "select nazwa_wyscigu, data_wyscigu " \
-                        "from wyscig " \
-                        "where data_wyscigu = (select max(data_wyscigu) from wyscig)"
+            # Dane pobrane z bazy
+            dane_live = self.database_live_data
 
-        cursor.execute(nazwa_wyscigu)
-        all_data = cursor.fetchall()
-        wyscig.clear()
+            # Poniższy kod odpowiada za wyświetlanie dla każdego kierowcy jedynie najszybszego okrążenia
+            unikalne_id = []
+            unikalny_kierowca = []
 
-        for a in all_data:
-            wyscig.append((a[0], a[1]))
+            for i in range(0, len(dane_live)):
+                if dane_live[i][0] not in unikalne_id:
+                    unikalne_id.append(dane_live[i][0])
+                    unikalny_kierowca.append(dane_live[i])
+                    continue
+                else:
+                    for j in range(0, len(unikalny_kierowca)):
+                        if dane_live[i][0] == unikalny_kierowca[j][0] \
+                                and dane_live[i][4] < unikalny_kierowca[j][4]:
+                            unikalny_kierowca[j] = dane_live[i]
+                            continue
 
-        nazwa_wyscigu = f"{str(wyscig[len(wyscig) - 1][0])}"
+            # Sortowanie wyników kierowców od najmniejszego czasu okrążenia
+            sortowane = sorted(unikalny_kierowca, key=lambda data: data[4])
 
-        bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
-                            size_hint=(None, None),
-                            pos_hint={"x": 0.06, "y": 0.835},
-                            font_size="30",
-                            color=get_color_from_hex('#EF8B00')))
+            # Poniższy kod odpowiada za wyświetlenie nazwy trwającego wyścigu
+            nazwa_wyscigu = "select nazwa_wyscigu, data_wyscigu " \
+                            "from wyscig " \
+                            "where data_wyscigu = (select max(data_wyscigu) from wyscig)"
 
-        # Wyświetlanie tytułów tabeli:
+            cursor.execute(nazwa_wyscigu)
+            all_data = cursor.fetchall()
+            wyscig.clear()
+
+            for a in all_data:
+                wyscig.append((a[0], a[1]))
+
+            nazwa_wyscigu = f"{str(wyscig[len(wyscig) - 1][0])}"
+
+            background.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
+                                size_hint=(None, None),
+                                pos_hint={"x": 0.1, "y": 0.8},
+                                font_size="30",
+                                color=get_color_from_hex('#EF8B00')))
+
+        # W przypadku gdy globalna zmienna rozpoczety = False
+        else:
+            background.add_widget(Label(text=f"Brak trwającego wyścigu",
+                                size_hint=(None, None),
+                                pos_hint={"x": 0.14, "y": 0.8},
+                                font_size="30",
+                                color=get_color_from_hex('#EF8B00')))
+
+        # Wyświetlanie tytułów tabeli
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(85, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(110, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(150, 35)))
@@ -394,42 +475,65 @@ class Live(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Status RFID", size=(100, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(80, 35)))
 
-        # Wyświetlanie wierszy tabeli:
-        licznik = 0
-        for i in sortowane:
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=f"{licznik + 1}", size=(85, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][1]),
-                                      size=(110, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][2]),
-                                      size=(150, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][3]),
-                                      size=(140, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][4]),
-                                      size=(120, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][5]),
-                                      size=(160, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
-                                      color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][6]),
-                                      size=(100, 35)))
-            tab.add_widget(KierowcaButton(text="Więcej", size_hint=(None, None), size=(80, 35),
-                                          id=int(sortowane[licznik][0])))
-            licznik += 1
+        if rozpoczety is True:
+            # Wyświetlanie wierszy tabeli:
+            licznik = 0
+            for i in sortowane:
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=f"{licznik + 1}", size=(85, 35)))
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][1]),
+                                          size=(110, 35)))
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][2]),
+                                          size=(150, 35)))
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][3]),
+                                          size=(140, 35)))
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][4]),
+                                          size=(120, 35)))
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][5]),
+                                          size=(160, 35)))
+                tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'),
+                                          color=get_color_from_hex('ffffff'), text=str(sortowane[licznik][6]),
+                                          size=(100, 35)))
+                tab.add_widget(KierowcaButton(text="Więcej", size_hint=(None, None), size=(80, 35),
+                                              id=int(sortowane[licznik][0])))
+                licznik += 1
         cursor.close()
+
+    # Funkcja kończąca wyścig
+    def zakoncz_wyscig(self):
+            global port_number
+            global rozpoczety
+
+            if rozpoczety is True:
+                if ser.isOpen:
+                    ser.close()
+
+                port_number = ""
+                rozpoczety = False
+                Clock.unschedule(self.connection_check())
+
+                # Rozłączenie w bazie danych wszystkich kierowców z ich RFID
+                cursor = connection.cursor()
+                cursor.execute("UPDATE przypisanie SET rfid=Null; COMMIT;")
+                okrazenie.clear()
+                database_connection.getData()
+                cursor.close()
 
 
 class WynikiKierowcy(Screen):
     text1 = "Strona główna"
     text2 = "Powrót"
 
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca dane pobrane z bazy danych
     def generuj(self):
+        # Odwołanie do elementów z pliku .kv
         tab = self.ids.tabelaKierowca
-        bg = self.ids.planszaKierowca
+        background = self.ids.planszaKierowca
 
         cursor = connection.cursor()
 
@@ -455,12 +559,14 @@ class WynikiKierowcy(Screen):
 
         wyniki = cursor.fetchall()
 
-        bg.add_widget(Label(text=f"Wyścig {wyniki[0][6]}",
+        # Wyświetlanie nazwy wyścigu
+        background.add_widget(Label(text=f"Wyścig {wyniki[0][6]}",
                             size_hint=(None, None),
                             pos_hint={"x": 0.15, "y": 0.8},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
+        # Wyświetlanie danych kierowcy
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text=f"{wyniki[0][1]} {wyniki[0][2]}",
                                   size=(952, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
@@ -474,6 +580,7 @@ class WynikiKierowcy(Screen):
                                   text="Czas okrążenia", size=(699, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), size=(100, 35)))
 
+        # Wyświetlanie okrążeń kierowcy
         licznik = 0
         for i in wyniki:
             tab.add_widget(
@@ -495,9 +602,11 @@ class SzczegolyOkrazenia(Screen):
     text1 = "Strona główna"
     text2 = "Powrót"
 
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca dane pobrane z bazy danych
     def generuj(self):
+        # Odwołanie do elementów z pliku .kv
         tab = self.ids.tabelaOkrazenia
-        bg = self.ids.planszaOkrazenia
+        background = self.ids.planszaOkrazenia
 
         cursor = connection.cursor()
 
@@ -515,6 +624,7 @@ class SzczegolyOkrazenia(Screen):
         czasy = []
         odcinki = []
 
+        # Obliczanie czasów na odcinkach pomiędzy punktami pomiarowymi
         licznik = 0
         for i in wyniki:
             czasy.append(wyniki[licznik][3])
@@ -524,12 +634,14 @@ class SzczegolyOkrazenia(Screen):
             duration = datetime.combine(date.min, czasy[i + 1]) - datetime.combine(date.min, czasy[i])
             odcinki.append(duration)
 
-        bg.add_widget(Label(text=f"Wyścig {wyniki[0][5]}",
+        # Wyświetlanie nazwy wyścigu
+        background.add_widget(Label(text=f"Wyścig {wyniki[0][5]}",
                             size_hint=(None, None),
                             pos_hint={"x": 0.15, "y": 0.8},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
+        # Wyświetlanie danych kierowcy
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text=f"{wyniki[0][0]} {wyniki[0][1]}",
                                   size=(952, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
@@ -548,6 +660,7 @@ class SzczegolyOkrazenia(Screen):
                                   text="Czas na odcinku", size=(699, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), size=(100, 35)))
 
+        # Wyświetlanie czasów na odcinkach dla kierowcy
         licznik = 0
         for i in odcinki:
             tab.add_widget(
@@ -570,20 +683,20 @@ class PoprzednieSesje(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca dane pobrane z bazy danych
     def generuj(self):
+        # Odwołanie do elementów z pliku .kv
         tab = self.ids.tabelaPoprzednie
-        bg = self.ids.oknoPoprzednie
+        background = self.ids.oknoPoprzednie
 
-        connection = db.connect(user="postgres",
-                                password="postgres",
-                                database="lapify")
-
+        # Pobieranie wyścigów z bazy danych
         cursor = connection.cursor()
 
         cursor.execute("select id_wyscigu, nazwa_wyscigu, data_wyscigu from wyscig")
         dane = cursor.fetchall()
 
-        bg.add_widget(Label(text=f"Historia wyścigów: ",
+        # Tytuł okna
+        background.add_widget(Label(text="Historia wyścigów: ",
                             size_hint=(None, None),
                             pos_hint={"x": 0.082, "y": 0.835},
                             font_size="30",
@@ -595,6 +708,7 @@ class PoprzednieSesje(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Data wyścigu", size=(157, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(120, 35)))
 
+        # Wyświetlanie poprzednich wyścigów
         licznik = 0
         for i in dane:
             tab.add_widget(
@@ -618,7 +732,6 @@ class PoprzednieSesje(Screen):
             licznik += 1
 
         cursor.close()
-        connection.close()
 
 
 class Pomoc(Screen):
@@ -640,14 +753,13 @@ class HistoriaWyscigu(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca dane pobrane z bazy danych
     def generuj(self):
+        # Odwołanie do elementów z pliku .kv
         tab = self.ids.tabelaHistoria
-        bg = self.ids.oknoHistoria
+        background = self.ids.oknoHistoria
 
-        connection = db.connect(user="postgres",
-                                password="postgres",
-                                database="lapify")
-
+        # Pobranie wyników kierowców z odbytego wyścigu
         cursor = connection.cursor()
 
         cursor.execute("SELECT k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu\
@@ -661,13 +773,14 @@ class HistoriaWyscigu(Screen):
         nazwa_wyscigu = dane[0][5]
         data = dane[0][4]
 
-        bg.add_widget(Label(text=f"Historia wyścigów: ",
+        # Wyświetlanie nazwy oraz daty wyscigu
+        background.add_widget(Label(text=f"Historia wyścigu {nazwa_wyscigu} ",
                             size_hint=(None, None),
                             pos_hint={"x": 0.09, "y": 0.85},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
-        bg.add_widget(Label(text=f"Data: {data}",
+        background.add_widget(Label(text=f"Data: {data}",
                             size_hint=(None, None),
                             pos_hint={"x": 0.24, "y": 0.8},
                             font_size="20",
@@ -681,6 +794,7 @@ class HistoriaWyscigu(Screen):
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(120, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(130, 35)))
 
+        # Wyświetlanie wyników kierowców dla odbytego wyścigu
         licznik = 0
         for i in dane:
             tab.add_widget(
@@ -708,11 +822,11 @@ class HistoriaWyscigu(Screen):
                            size=(130, 35)))
 
             licznik += 1
-
         cursor.close()
 
 
 class Bramki(Screen):
+    # Funkcje pozwalające na zmianę animacji przejścia pomiędzy oknami
     def swap(self):
         Manager.transition = SwapTransition()
 
@@ -727,25 +841,40 @@ class Bramki(Screen):
 
     def assign_port(self):
         global port_number
+        # Odwołanie do tekstu wpisanego do pola tekstowego z pliku .kv
         port_number = self.ids.port_number.text
         global ser
+        print(f"Numer portu: {port_number}")
         try:
             ser = serial.Serial(f'COM{port_number}', baudrate=9600, timeout=1)
         except serial.SerialException as ex:
             print("Error! No such serial port")
 
-    def generuj(self):
+    # Funkcja odświeżająca wyświetlane bramki
+    def refresh(self, dt):
+        self.add_tag_id()
+
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca tabelę
+    def generuj(self, *args):
+        # Odwołanie do elementu z pliku .kv
         tab = self.ids.tabelabramki
         tab.clear_widgets()
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przychodzące pakiety", size=(471, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Przypisz", size=(390, 35)))
+        # Automatyczne odświeżanie wyświetlanych bramek co 4 sekundy
+        Clock.schedule_interval(self.refresh, 4)
 
-    def add_tag_id(self):
+
+    def add_tag_id(self, *args):
         global number
         global ping
 
+        wyswietlane = ping
+        wyswietlane.sort()
+        # Odwołanie do elementu z pliku .kv
         tab = self.ids.tag_id
         tab.clear_widgets()
+
         for i in range(len(ping)):
             tag_list = BoxLayout(size_hint_y=None, height=40, pos_hint={'top': .5}, size_hint_x=None, width=280)
             tab.add_widget(tag_list)
@@ -760,6 +889,7 @@ class Bramki(Screen):
             tag_list.add_widget(
                 MetaButton(text="Meta", id=f"{i}", size_hint=(None, None), size=(129, 35),
                            on_release=lambda x: self.updateMeta()))
+        wyswietlane.clear()
 
     def updateStart(self):
         global number
@@ -813,6 +943,14 @@ class Bramki(Screen):
         connection.commit()
         connection.close()
 
+    # Funkcja wywoływana po opuszczeniu okna konfiguracji bramek, zapisuje wybrane bramki oraz
+    # wyłącza timer automatycznego odświeżania okna
+    def przypisano(self):
+        global ping
+        global bramki_wyscigu
+        bramki_wyscigu = ping
+        Clock.unschedule(self.refresh)
+
 
 class Rozpocznij(Screen):
     text1 = "Strona główna"
@@ -820,8 +958,7 @@ class Rozpocznij(Screen):
     text3 = "Dodaj kierowcę"
     text4 = "Wybierz kierowcę"
 
-    def swap(self):
-        Manager.transition = SwapTransition()
+
 
     content = Button(text='OK',
                      background_down='graphics/pressed.png')
@@ -836,6 +973,7 @@ class Rozpocznij(Screen):
     content.bind(on_release=error.dismiss)
 
     def input(self):
+        # Odwołanie do elementu z pliku .kv
         nazwa_wyscigu = self.ids.wyscig
 
         if nazwa_wyscigu.text == "":
@@ -847,6 +985,10 @@ class Rozpocznij(Screen):
             cursor.execute("insert into wyscig (id_wyscigu, nazwa_wyscigu, data_wyscigu ) values (%s, %s, %s);commit",
                            (len(rows) + 1, nazwa_wyscigu.text, date.today()))
             cursor.close()
+
+    # Funkcje pozwalające na zmianę animacji przejścia pomiędzy oknami
+    def swap(self):
+        Manager.transition = SwapTransition()
 
     def unswap(self):
         Manager.transition = NoTransition()
@@ -866,7 +1008,9 @@ class PolaczRFID(Screen):
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
 
+    # Funkcja wywoływana po przejściu do okienka, wyświetląjąca dane pobrane z bazy danych
     def generuj(self):
+        # Odwołanie do elementu z pliku .kv
         tab = self.ids.tabelaRFID
 
         connection = db.connect(user="postgres",
@@ -942,34 +1086,13 @@ class PolaczRFID(Screen):
         connection.close()
 
 
-class Manager(ScreenManager):
-
-    @staticmethod
-    def switch(x):
-        global number
-        number = x
-
-    @staticmethod
-    def inside_switch(x):
-        global inside_number
-        inside_number = x
-
-    @staticmethod
-    def enum_switch(x):
-        global enum_number
-        enum_number = x
-
-    def __init__(self, **kwargs):
-        super(ScreenManager, self).__init__(**kwargs)
-        self.transition = NoTransition()
-
-
 class DodajKierowce(Screen):
 
     def clear_inputs(self, text_inputs):
         for text_input in text_inputs:
             text_input.text = ""
 
+    # Funkcje pozwalające na zmianę animacji przejścia pomiędzy oknami
     def unswap(self):
         Manager.transition = NoTransition()
 
@@ -984,6 +1107,7 @@ class DodajKierowce(Screen):
     text3 = "Imię"
 
     def add_driver(self):
+        # Odwołanie do elementów oraz danych wpisanych do pól tekstowych z pliku .kv
         grid = self.ids.list
         imie = self.ids.name.text
         nazwisko = self.ids.last_name.text
@@ -1005,43 +1129,83 @@ class DodajKierowce(Screen):
         list.add_widget(kategoria)
         list.add_widget(empty)
 
-        connection = db.connect(
-            database="lapify",
-            user="postgres",
-            password="postgres")
-
         cursor = connection.cursor()
         cursor.execute("SELECT id_kierowcy, imie, nazwisko, model_samochodu,kategoria FROM kierowca ")
         rows = cursor.fetchall()
 
-        cursor = connection.cursor()
         cursor.execute("SELECT id_wyscigu FROM wyscig WHERE data_wyscigu = (select max(data_wyscigu) from wyscig) ")
         b = cursor.fetchall()
 
-        cursor = connection.cursor()
         cursor.execute(
             " INSERT INTO kierowca ( id_kierowcy, imie, nazwisko, model_samochodu, kategoria) VALUES (%s,%s,%s,%s,%s)",
             (len(rows) + 1, self.ids.name.text, self.ids.last_name.text, self.ids.model.text,
              self.ids.category.text))
 
         connection.commit()
-        connection.close()
+        cursor.close()
+
+    def rozpocznij(self):
+        global rozpoczety
+        global meta
+        rozpoczety = True
+
+        cursor = connection.cursor()
+        cursor.execute("SELECT nr_bramki FROM bramka WHERE id_bramki = 3")
+        id_mety = cursor.fetchone()
+        meta = id_mety[0]
 
 
+class Refresh(Screen):
+    text1 = "Strona główna"
+    text2 = "Dodaj kierowcę"
+    text3 = "Połącz z RFID"
+    text4 = "Zakończ wyścig"
+
+    # Przenoszenie po 0.01 sekundy z powrotem do okna live, w celu odświeżenia zawartości tabeli
+    def skip(self, dt):
+        self.manager.current = "live"
+
+    def on_enter(self, *args):
+        Clock.schedule_once(self.skip, 0.01)
+
+
+class Manager(ScreenManager):
+
+    # Funkcja podmieniająca zawartość zmiennej globalnej wartością przypisaną do przycisku
+    @staticmethod
+    def switch(x):
+        global number
+        number = x
+
+    # Funkcja podmieniająca zawartość zmiennej globalnej wartością przypisaną do przycisku
+    @staticmethod
+    def inside_switch(x):
+        global inside_number
+        inside_number = x
+
+    # Funkcja podmieniająca zawartość zmiennej globalnej wartością przypisaną do przycisku
+    @staticmethod
+    def enum_switch(x):
+        global enum_number
+        enum_number = x
+
+    # Ustawienie domyślnej animacji przejścia pomiędzy oknami jako NoTransition
+    def __init__(self, **kwargs):
+        super(ScreenManager, self).__init__(**kwargs)
+        self.transition = NoTransition()
+
+
+# Załadowanie do programu pliku .kv
 kv = Builder.load_file("design.kv")
 
 
-class LapifyApp(App):
+# Klasa wykorzystywana do uruchomienia aplikacji
+class lapifyApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def build(self):
         return kv
-
-
-thread_stop = False
-
-ping = []
 
 
 def clear_ping():
@@ -1052,16 +1216,22 @@ def clear_ping():
 def packet_receive():
     buffor = ""
     global port_number
+    global missing_bramka
+    global bramka_error
+    global obecne_pingi
+    global bramki_wyscigu
+    global ping
+
     while 1:
-        threading.Timer(5, clear_ping).start()
         if port_number == "":
-            time.sleep(1)
+            sleep(1)
         else:
             try:
                 data = ser.read()
                 if len(data) != 0 and ord(data) >= 32 and ord(data) <= 128:
                     buffor += str(data.decode('utf-8'))
                 elif (data == b'\r' or data == b'\n') and len(buffor) == 34:
+                    print(buffor)
                     if buffor[12:14] == '01':
                         global ping
                         if buffor[2:10] not in ping:
@@ -1074,44 +1244,61 @@ def packet_receive():
                         timestamp_minutes = (timestamp * 60) % 60
                         timestamp_seconds = (timestamp * 3600) % 60
                         time = "%d:%02d:%02d" % (timestamp_hours, timestamp_minutes, timestamp_seconds)
-                        print(time)
+                        print(f"Czas odczytany z pakietu: {time}")
                         rfid_tag = str(buffor[14:22])
                         nr_bramki = str(buffor[2:10])
 
+                        # Wykrywanie czy odczytana bramka jest bramką kończącą okrążenia
+                        if nr_bramki == meta:
+                            global pakiet_mety
+                            pakiet_mety = nr_bramki
+
                         cursor = connection.cursor()
 
-                        cursor.execute("SELECT id_przejazdu FROM przejazd ")
+                        cursor.execute("SELECT id_przejazdu FROM przejazd; ")
                         rows = cursor.fetchall()
 
-                        cursor.execute("SELECT id_przypisania from przypisanie"
-                                       " where rfid = '%s' " % rfid_tag)
+                        cursor.execute(f"SELECT id_przypisania from przypisanie \
+                                         where rfid = '{rfid_tag}';")
                         id_przypisania = cursor.fetchall()
 
                         cursor.execute("SELECT id_bramki from bramka"
-                                       " where nr_bramki = '%s' " % nr_bramki)
+                                       " where nr_bramki = '%s' ;" % nr_bramki)
                         id_bramki = cursor.fetchall()
 
-                        cursor.execute("SELECT id_bramki FROM przejazd ORDER BY id_przejazdu desc LIMIT 1")
+                        cursor.execute("SELECT id_bramki FROM przejazd ORDER BY id_przejazdu desc LIMIT 1;")
                         ostatnia_bramka = cursor.fetchall()
 
-                        cursor.execute("SELECT id_ok FROM przejazd order by id_przejazdu desc limit 1 ")
+                        cursor.execute("SELECT id_ok FROM przejazd order by id_przejazdu desc limit 1 ;")
                         next_ok = cursor.fetchall()
+
                         if ostatnia_bramka[0][0] == 3:
                             a = next_ok[0][0]
                             a += 1
                             cursor.execute(
-                                " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s)",
+                                " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s);",
                                 (len(rows) + 1, a, id_przypisania[0], id_bramki[0], time))
-
                         else:
                             cursor.execute(
-                                " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s)",
+                                " INSERT INTO przejazd ( id_przejazdu, id_ok, id_przypisania, id_bramki, czas) VALUES (%s,%s,%s,%s,%s);",
                                 (len(rows) + 1, next_ok[0], id_przypisania[0], id_bramki[0], time))
 
+                    # Wykrywanie czy wszystkie skonfigurowane bramki odpowiednio działają
+                    if rozpoczety is True:
+                        if len(obecne_pingi) == len(bramki_wyscigu) + 1:
+                            for i in bramki_wyscigu:
+                                if i not in obecne_pingi:
+                                    missing_bramka = i
+                                    bramka_error = True
+                            obecne_pingi.clear()
+                        else:
+                            obecne_pingi.append(buffor[2:10])
+
                     buffor = ""
+
             except:
                 "Error with data read"
-        if thread_stop:
+        if thread_stop is True:
             break
 
 
@@ -1120,11 +1307,14 @@ def receive_thread():
     thread.start()
 
 
+# Nawiązanie połączenia z bazą danych, uruchomienie dodatkowego wątku oraz aplikacji
+# Zatrzymanie wątku oraz zamknięcie połączenia z bazą danych po zakończeniu działania aplikacji
 if __name__ == '__main__':
     database_connection = DatabaseConnecion()
     database_connection.getData()
     database_connection.getWyscig()
     receive_thread()
-    LapifyApp().run()
-    connection.close()
+    lapifyApp().run()
     thread_stop = True
+    connection.close()
+

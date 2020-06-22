@@ -108,7 +108,7 @@ while True:
     proximity_finish = generate_packet_finish(Type.proximity, gps)
     ping_finish = generate_packet_finish(Type.ping, gps)
     reset = False
-    race = True
+    race = False
 
     if i == 10 and race is True:
         print(f"\nPakiety {j} (start):")
