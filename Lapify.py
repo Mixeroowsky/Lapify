@@ -66,7 +66,6 @@ Builder.load_string("""
   on_release: 
     app.root.switch(self.id)
     app.root.race_switch(self.race_id)
-    app.root.current = "kierowca1"
 <StartButton>:
     background_down: 'graphics/pressed.png'
 <KontrolnyButton>:
@@ -138,6 +137,7 @@ class HistoriaButton(Button):
 class KierowcaButton(Button):
     id = ObjectProperty(None)
 
+
 class KierowcaButton1(Button):
     id = ObjectProperty(None)
     race_id = ObjectProperty(None)
@@ -147,9 +147,10 @@ class OkrazenieButton(Button):
     id = ObjectProperty(None)
     enum_id = ObjectProperty(None)
 
+
 class OkrazenieButton1(Button):
-     id = ObjectProperty(None)
-     enum_id = ObjectProperty(None)
+    id = ObjectProperty(None)
+    enum_id = ObjectProperty(None)
 
 
 class SelectableRecycleGridLayout(FocusBehavior, LayoutSelectionBehavior,
@@ -516,6 +517,7 @@ class WynikiKierowcy(Screen):
         cursor.close()
         wyniki.clear()
 
+
 class WynikiKierowcy1(Screen):
     text1 = "Strona główna"
     text2 = "Powrót"
@@ -532,66 +534,67 @@ class WynikiKierowcy1(Screen):
     content.bind(on_release=error.dismiss)
 
     def generuj(self):
-        try:
-            tab = self.ids.tabelaKierowca1
-            bg = self.ids.planszaKierowca1
 
-            cursor = connection.cursor()
+        tab = self.ids.tabelaKierowca1
+        bg = self.ids.planszaKierowca1
 
-            data_command = f"select distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,\
-                           (bramkaKoniec-bramkaPoczatek) as okrazenie, k.kategoria, w.nazwa_wyscigu, p.id_ok \
-                           from kierowca k  \
-                           join przypisanie r  \
-                           on k.id_kierowcy = r.id_kierowcy  \
-                           join przejazd p \
-                           on r.id_przypisania = p.id_przypisania \
-                           join (select id_ok, czas as bramkaPoczatek from przejazd  \
-                           where id_bramki = (select min(distinct id_bramki) from przejazd) )a  \
-                           on p.id_ok = a.id_ok  \
-                           join (select id_ok, czas as bramkaKoniec from przejazd  \
-                           where id_bramki = (select max(distinct id_bramki) from przejazd) )b  \
-                           on b.id_ok = p.id_ok  \
-                           join wyscig w  \
-                           on r.id_wyscigu = w.id_wyscigu  \
-                           where w.id_wyscigu = {race_number} \
-                           AND k.id_kierowcy = {number};"
+        cursor = connection.cursor()
 
-            cursor.execute(data_command)
+        data_command = f"select distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,\
+                       (bramkaKoniec-bramkaPoczatek) as okrazenie, k.kategoria, w.nazwa_wyscigu, p.id_ok \
+                       from kierowca k  \
+                       join przypisanie r  \
+                       on k.id_kierowcy = r.id_kierowcy  \
+                       join przejazd p \
+                       on r.id_przypisania = p.id_przypisania \
+                       join (select id_ok, czas as bramkaPoczatek from przejazd  \
+                       where id_bramki = (select min(distinct id_bramki) from przejazd) )a  \
+                       on p.id_ok = a.id_ok  \
+                       join (select id_ok, czas as bramkaKoniec from przejazd  \
+                       where id_bramki = (select max(distinct id_bramki) from przejazd) )b  \
+                       on b.id_ok = p.id_ok  \
+                       join wyscig w  \
+                       on r.id_wyscigu = w.id_wyscigu  \
+                       where w.id_wyscigu = {race_number} \
+                       AND k.id_kierowcy = {number};"
 
-            wyniki = cursor.fetchall()
+        cursor.execute(data_command)
+
+        wyniki = cursor.fetchall()
+
+        self.manager.current = "kierowca1"
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text=f"{wyniki[0][1]} {wyniki[0][2]}",
+                                  size=(765, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
+                                  text=f"{wyniki[0][3]}", size=(765, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
+                                  text=f"{wyniki[0][5]}", size=(765, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(765, 3)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
+                                  text="Numer okrążenia", size=(200, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
+                                  text="Czas okrążenia", size=(465, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), size=(100, 35)))
 
 
 
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text=f"{wyniki[0][1]} {wyniki[0][2]}",
-                                      size=(765, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
-                                      text=f"{wyniki[0][3]}", size=(765, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
-                                      text=f"{wyniki[0][5]}", size=(765, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(765, 3)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
-                                      text="Numer okrążenia", size=(200, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
-                                      text="Czas okrążenia", size=(465, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), size=(100, 35)))
+        licznik = 0
+        for i in wyniki:
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
+                           color=get_color_from_hex('ffffff'),
+                           size=(200, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(wyniki[licznik][4]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(465, 35)))
+            tab.add_widget(OkrazenieButton1(text="Szczegóły", size_hint=(None, None), size=(100, 35),
+                                            id=int(wyniki[licznik][7]), enum_id=licznik + 1))
+            licznik += 1
+        cursor.close()
+        wyniki.clear()
 
-            licznik = 0
-            for i in wyniki:
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
-                               color=get_color_from_hex('ffffff'),
-                               size=(200, 35)))
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(wyniki[licznik][4]),
-                               color=get_color_from_hex('ffffff'),
-                               size=(465, 35)))
-                tab.add_widget(OkrazenieButton1(text="Szczegóły", size_hint=(None, None), size=(100, 35),
-                                               id=int(wyniki[licznik][7]), enum_id=licznik + 1))
-                licznik += 1
-            cursor.close()
-            wyniki.clear()
-        except IndexError:
-            self.error.open()
+
 class SzczegolyOkrazenia(Screen):
     text1 = "Strona główna"
     text2 = "Powrót"
@@ -664,6 +667,7 @@ class SzczegolyOkrazenia(Screen):
         cursor.close()
         wyniki.clear()
 
+
 class SzczegolyOkrazenia1(Screen):
     text1 = "Strona główna"
     text2 = "Powrót"
@@ -699,8 +703,6 @@ class SzczegolyOkrazenia1(Screen):
             duration = datetime.combine(date.min, czasy[i + 1]) - datetime.combine(date.min, czasy[i])
             odcinki.append(duration)
 
-
-
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text=f"{wyniki[0][0]} {wyniki[0][1]}",
                                   size=(765, 35)))
         tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#505050'), color=get_color_from_hex('ffffff'),
@@ -733,6 +735,8 @@ class SzczegolyOkrazenia1(Screen):
             licznik += 1
         cursor.close()
         wyniki.clear()
+
+
 class PoprzednieSesje(Screen):
     text1 = "Strona główna"
 
@@ -826,84 +830,114 @@ class HistoriaWyscigu(Screen):
 
     def generuj(self):
         global number
+        tab = self.ids.tabelaHistoria
+        bg = self.ids.oknoHistoria
+
+        connection = db.connect(user="postgres",
+
+                                password="postgres",
+                                database="lapify")
+
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu, w.id_wyscigu\
+                            FROM public.kierowca AS k\
+                            JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
+                            JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu"
+                       f"    where w.id_wyscigu = {number} ;")
+
+        dane = cursor.fetchall()
+
+        nazwa_wyscigu = dane[0][5]
+        data = dane[0][5]
+
+        bg.add_widget(Label(text=f"Historia wyścigów: ",
+                            size_hint=(None, None),
+                            pos_hint={"x": 0.09, "y": 0.85},
+                            font_size="30",
+                            color=get_color_from_hex('#EF8B00')))
+
+        bg.add_widget(Label(text=f"Data: {data}",
+                            size_hint=(None, None),
+                            pos_hint={"x": 0.24, "y": 0.8},
+                            font_size="20",
+                            color=get_color_from_hex('#000000')))
+
+        # Wyświetlanie tytułów tabeli:
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(70, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(100, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(140, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Model samochodu", size=(135, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(120, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(120, 35)))
+        tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(75, 35)))
+
+        licznik = 0
+        for i in dane:
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
+                           color=get_color_from_hex('ffffff'),
+                           size=(70, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][1]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(100, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(140, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][3]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(135, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text="", color=get_color_from_hex('ffffff'),
+                           size=(120, 35)))
+            tab.add_widget(
+                PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][4]),
+                           color=get_color_from_hex('ffffff'),
+                           size=(120, 35)))
+            tab.add_widget(KierowcaButton1(text="Więcej", size_hint=(None, None), size=(75, 35),
+                                           id=int(dane[licznik][0]), race_id=licznik + 1,
+                                           on_release=lambda x: self.error_check()))
+
+            licznik += 1
+
+        cursor.close()
+
+    def error_check(self):
+
+        cursor = connection.cursor()
+        data_command = f"select distinct k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu,\
+                               (bramkaKoniec-bramkaPoczatek) as okrazenie, k.kategoria, w.nazwa_wyscigu, p.id_ok \
+                               from kierowca k  \
+                               join przypisanie r  \
+                               on k.id_kierowcy = r.id_kierowcy  \
+                               join przejazd p \
+                               on r.id_przypisania = p.id_przypisania \
+                               join (select id_ok, czas as bramkaPoczatek from przejazd  \
+                               where id_bramki = (select min(distinct id_bramki) from przejazd) )a  \
+                               on p.id_ok = a.id_ok  \
+                               join (select id_ok, czas as bramkaKoniec from przejazd  \
+                               where id_bramki = (select max(distinct id_bramki) from przejazd) )b  \
+                               on b.id_ok = p.id_ok  \
+                               join wyscig w  \
+                               on r.id_wyscigu = w.id_wyscigu  \
+                               where w.id_wyscigu = {race_number} \
+                               AND k.id_kierowcy = {number};"
+
+        cursor.execute(data_command)
+
+        wyniki = cursor.fetchall()
+        error_check = True
         try:
-            tab = self.ids.tabelaHistoria
-            bg = self.ids.oknoHistoria
-
-            connection = db.connect(user="postgres",
-
-                                    password="postgres",
-                                    database="lapify")
-
-            cursor = connection.cursor()
-
-            cursor.execute("SELECT k.id_kierowcy, k.imie, k.nazwisko, k.model_samochodu, k.kategoria, w.data_wyscigu, w.nazwa_wyscigu, w.id_wyscigu\
-                                FROM public.kierowca AS k\
-                                JOIN public.przypisanie AS p ON k.id_kierowcy = p.id_kierowcy\
-                                JOIN public.wyscig AS w ON p.id_wyscigu = w.id_wyscigu"
-                           f"    where w.id_wyscigu = {number} ;")
-
-            dane = cursor.fetchall()
-
-            nazwa_wyscigu = dane[0][5]
-            data = dane[0][5]
-
-            bg.add_widget(Label(text=f"Historia wyścigów: ",
-                                size_hint=(None, None),
-                                pos_hint={"x": 0.09, "y": 0.85},
-                                font_size="30",
-                                color=get_color_from_hex('#EF8B00')))
-
-            bg.add_widget(Label(text=f"Data: {data}",
-                                size_hint=(None, None),
-                                pos_hint={"x": 0.24, "y": 0.8},
-                                font_size="20",
-                                color=get_color_from_hex('#000000')))
-
-            # Wyświetlanie tytułów tabeli:
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Miejsce", size=(70, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Imię", size=(100, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Nazwisko", size=(140, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Model samochodu", size=(135, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Najlepszy czas", size=(120, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), text="Kategoria", size=(120, 35)))
-            tab.add_widget(PoleTabeli(bgcolor=get_color_from_hex('#EF8B00'), size=(75, 35)))
-
-            licznik = 0
-            for i in dane:
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=f"{licznik + 1}",
-                               color=get_color_from_hex('ffffff'),
-                               size=(70, 35)))
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][1]),
-                               color=get_color_from_hex('ffffff'),
-                               size=(100, 35)))
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][2]),
-                               color=get_color_from_hex('ffffff'),
-                               size=(140, 35)))
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][3]),
-                               color=get_color_from_hex('ffffff'),
-                               size=(135, 35)))
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text="", color=get_color_from_hex('ffffff'),
-                               size=(120, 35)))
-                tab.add_widget(
-                    PoleTabeli(bgcolor=get_color_from_hex('#505050'), text=str(dane[licznik][4]),
-                               color=get_color_from_hex('ffffff'),
-                               size=(120, 35)))
-                tab.add_widget(KierowcaButton1(text="Więcej", size_hint=(None, None), size=(75, 35),
-                                               id=int(dane[licznik][0]),race_id=licznik + 1))
-
-                licznik += 1
-
-            cursor.close()
-
-        except IndexError:
+            print(wyniki[0][1])
+        except:
+            error_check = False
+        if error_check:
+            self.manager.current = "kierowca1"
+        else:
             self.error.open()
-
 
 class Bramki(Screen):
     def swap(self):
