@@ -105,9 +105,6 @@ Manager:
                 size_hint: None, None
                 pos: root.width-self.width+20,root.height-230
                 size:250,250
-
-
-
             Button:
                 background_color: hex('#FFFFFF')
                 pos_hint:{"x":0.68,"top":0.55}
@@ -303,6 +300,16 @@ Manager:
             text: root.text3
             on_release:
                 app.root.current = "polaczRFID"
+	    Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.25}
+            size_hint: 0.15, 0.1
+            text: "Zakoncz LIVE"
+            on_release:
+                app.root.current = "nowa"
+
+
+
 
 
     StackLayout:
@@ -1298,17 +1305,6 @@ Manager:
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
-	            pos_hint: {"x":0.65,"y":0.55}
-	            size: 50,50
-	            text: "OK"
-	            color: hex('#E27814')
-                on_release:
-                    root.input()
-
-
-	        Button:
-	            background_color: hex('#FFFFFF')
-	            size_hint: (None,None)
 	            pos_hint: {"x":0.15,"y":0.12}
 	            size: 110,40
 	            text: "Cofnij"
@@ -1318,6 +1314,7 @@ Manager:
 	                app.root.current = "bramki"
 	                root.unfade()
 	        Button:
+	            id: dalej
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint:{"center_x":0.8,"y":0.13}
@@ -1326,7 +1323,7 @@ Manager:
 	            color: hex('#E27814')
 	            on_release:
                     root.fade()
-                    app.root.current = "dodaj"
+                    root.input()
                     root.unfade()
 
 ################################################################################################
