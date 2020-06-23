@@ -1,0 +1,1560 @@
+#:kivy 1.11.1
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+#:import hex kivy.utils.get_color_from_hex
+#:import utils kivy.utils
+#:import Factory kivy.factory.Factory
+
+Manager:
+	transition: NoTransition()
+	Startowa:
+    NowaSesja:
+    Bramki:
+    Rozpocznij:
+    NowyKierowca:
+    DodajKierowce:
+    Live:
+    WynikiKierowcy:
+    WynikiKierowcy1:
+    SzczegolyOkrazenia:
+    SzczegolyOkrazenia1:
+    PoprzednieSesje:
+    HistoriaWyscigu:
+    Pomoc:
+    PolaczRFID:
+
+################################################################################################
+<OrangeLabel@Label>
+    font_name: 'graphics/Roboto-Light'
+    font_size: '20'
+    color: 1,.5,0,1
+
+################################################################################################
+<Button>:          # Pomarańczowe guziczki
+    background_down: 'graphics/pressed.png'
+
+################################################################################################
+<ImageButton@Button>:
+	background_normal: 'graphics/titlebar.png'
+	background_down: 'graphics/pressed.png'
+	size_hint: (None,None)
+	size: 120,40
+	color: 0,0,0,1
+	font_name: 'graphics/Roboto-Light'
+	font_size: '14'
+################################################################################################
+<Startowa>:
+    name: 'start'
+    canvas:
+        Color:
+	        rgba: hex ('#434042')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    AnchorLayout:
+        Image:
+            source: 'graphics/start.png'
+            size_hint: 0.7,0.7
+
+################################################################################################
+<NowaSesja>:
+    name: "nowa"
+    on_pre_enter: tabelaOstatniaSesja.clear_widgets()    # Czyścimy tabele
+    on_enter: root.generujtabele()    # Wyświetlamy zaktualizowaną
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+            Image:
+                source: 'graphics/lapify.png'
+                size_hint: None, None
+                pos: root.width-(self.width+200),root.height-160
+                size: 120,120
+            Image:
+                source: 'graphics/gllogo.png'
+                size_hint: None, None
+                pos: root.width-self.width+20,root.height-230
+                size:250,250
+            Button:
+                background_color: hex('#FFFFFF')
+                pos_hint:{"x":0.68,"top":0.55}
+                size_hint: 0.22, 0.1
+                text: root.text2
+                on_release:
+                    root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
+                    app.root.current = "bramki"
+                    root.unfade()
+
+            Button:
+                background_color: hex('#FFFFFF')
+                pos_hint:{"x":0.68,"top":0.4}
+                size_hint: 0.22, 0.1
+                text: "Koniec"
+                on_release:
+                    app.stop() 	  # Wychodzenie z apki przyciskiem
+	        Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.06,"y":0.89}
+	            font_size: '30'
+	            text: "Ostatnia sesja:"
+	            color: hex('#EF8B00')
+
+            FloatLayout:
+                id: p_ostatnia_sesja
+
+                GridLayout:      # Ciemna obwódka wokół tabeli
+                    cols: 1
+                    size_hint: (None,None)
+                    size: (734,504.5)
+                    pos_hint:{"x":0.009,"y":0.113}
+                    canvas:
+                        Color:
+                            rgba: hex('#404040')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                ScrollView:
+                    size_hint:(0.585,.696)
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    pos_hint:{"x":0.011,"y":0.115}
+                    bar_width: 16
+                    bar_color: 5, 10, 15, .8
+                    bar_inactive_color: 5, 20, 10, .5
+                    scroll_type: ['bars']
+                    StackLayout:      # Tabela
+                        id: tabelaOstatniaSesja
+                        orientation: 'lr-tb'
+                        spacing: [1,1]
+                        size_hint: (None,None)
+                        size: (730,2000)
+                        pos_hint:{"x":0.02,"y":0.103}
+                        canvas:
+                            Color:
+                                rgba: hex('#606060')
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+
+
+################################################################################################
+<PoprzednieSesje>:
+    name: "poprzednie"
+    on_enter:
+        tabelaPoprzednie.clear_widgets()    # Czyścimy tabele
+        root.generuj()    # Wyświetlamy zaktualizowaną
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+    FloatLayout:    #czarna ramka wokół okienka
+
+	    FloatLayout:
+	        id: oknoPoprzednie
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (734,505)
+                pos_hint:{"x":0.009,"y":0.113}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.585,.696)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.011,"y":0.115}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelaPoprzednie
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (730,2000)
+                    pos_hint:{"x":0.01,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+
+######################################################
+<Live>:
+    name: "live"
+    on_pre_enter: root.generuj()    # Wyświetlamy zaktualizowaną
+    on_leave:
+        tabelaLive.clear_widgets()    # Czyścimy tabele
+        plansza.clear_widgets()
+
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.55}
+            size_hint: 0.15, 0.1
+            text: root.text2
+            on_release:
+                root.fade()     # Żeby fade był tylko przy okienku Rozpocznij
+                app.root.current = "dodaj"
+                root.unfade()
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.4}
+            size_hint: 0.15, 0.1
+            text: root.text3
+            on_release:
+                app.root.current = "polaczRFID"
+	    Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.25}
+            size_hint: 0.15, 0.1
+            text: "Zakoncz LIVE"
+            on_release:
+                app.root.current = "nowa"
+
+
+
+
+
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: plansza
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.168}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.759,.696)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.01,"y":0.17}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    id: tabelaLive
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (952,2000)
+                    pos_hint:{"x":0.01,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+######################################################
+<WynikiKierowcy>:
+    name: "kierowca"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaKierowca.clear_widgets()
+        planszaKierowca.clear_widgets()
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: planszaKierowca
+
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaKierowca
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                pos_hint:{"x":0.84,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: root.text2
+                on_release:
+                    app.root.current = "live"
+
+<WynikiKierowcy1>:
+    name: "kierowca1"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaKierowca1.clear_widgets()
+        planszaKierowca1.clear_widgets()
+
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: planszaKierowca1
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaKierowca1
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Button:
+                size_hint: 0.1, 0.05
+                pos_hint:{"center_x":0.5,"y":0.13}
+                text: root.text2
+                on_release:
+                    app.root.current = "poprzednie"
+
+
+######################################################
+<SzczegolyOkrazenia>:
+    name: "okrazenie"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaOkrazenia.clear_widgets()
+        planszaOkrazenia.clear_widgets()
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+
+        FloatLayout:
+
+            FloatLayout:
+                id: planszaOkrazenia
+
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.167}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:
+                id: tabelaOkrazenia
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (952,500)
+                pos_hint:{"x":0.01,"y":0.17}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                pos_hint:{"x":0.84,"y":0.5}
+                size_hint: (None,None)
+                size: (100,50)
+                text: root.text2
+                on_release:
+                    app.root.current = "kierowca"
+
+<SzczegolyOkrazenia1>:
+    name: "okrazenie1"
+
+    on_pre_enter:
+        root.generuj()
+
+    on_leave:
+        tabelaOkrazenia1.clear_widgets()
+        planszaOkrazenia1.clear_widgets()
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: planszaOkrazenia1
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaOkrazenia1
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Button:
+                size_hint: 0.1, 0.05
+                pos_hint:{"center_x":0.5,"y":0.13}
+                text: root.text2
+                on_release:
+                    app.root.current = "kierowca1"
+
+
+######################################################
+<Pomoc>:
+    name: "pomocy"
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            text: "Live"
+            on_release:
+                app.root.current = "live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+            on_release:
+                app.root.current = "poprzednie"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+            on_release:
+                app.root.current = "pomocy"
+######################################################
+#   zawartosc karty pomoc
+######################################################
+        BoxLayout:
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    size_hint_y: .2
+                OrangeLabel:
+
+                    text: root.text2
+
+                    size_hint_y: .2
+                OrangeLabel:
+                    size_hint_y: .3
+                    text: "info@globallogic.com"
+                    font_size: '32'
+                Label:
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    size_hint_y: .2
+                OrangeLabel:
+                    text: "Lapify v0.0.1"
+                    font_size: '32'
+                    size_hint_y: 0.1
+                OrangeLabel:
+                    text: "Dla Global Logic S. A."
+                    size_hint_y: 0.1
+                    font_size: '32'
+                Label:
+
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    size_hint_y: .5
+                OrangeLabel:
+                    text: "Autorzy: "
+                    size_hint_y: .1
+                OrangeLabel:
+
+                    text: root.text3
+
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Piotr Janicki"
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: "Aleksandra Kaczmarska"
+                    size_hint_y: .1
+                OrangeLabel:
+
+                    text: root.text4
+                    size_hint_y: .1
+                OrangeLabel:
+                    text: root.text5
+
+                    size_hint_y: .1
+                Label:
+
+######################################################
+
+######################################################
+<DodajKierowce>:
+    name: "dodaj"
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.47,"y":0.76}
+	            font_size: '24'
+	            color: hex('#000000')
+	            text: root.text2
+
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint: (0.6, 0.5) #rozmiar ciemnoszarego tla
+                pos_hint:{"x":0.2,"y":0.2}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+                FloatLayout:
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_x: .9
+                        pos_hint: {"center_x":.4,'y': 1} #pozycja labelow i inputow
+                        BoxLayout:
+                            size_hint_y: None
+                            height: 50
+
+                            Label:
+                                text: root.text3
+                                size_hint_x: .4
+
+                            Label:
+                                text: 'Nazwisko'
+                                size_hint_x: .3
+
+                            Label:
+                                text: 'Model'
+                                size_hint_x: .3
+
+                            Label:
+                                text: 'Kategoria'
+                                size_hint_x: .3
+                            Label:
+                                text: ''
+                                size_hint_x: .3
+                        BoxLayout:
+                            id: input
+                            size_hint_y: None
+                            pos_hint_x: 1
+                            height: 40
+                            Label:
+                                text: ''
+                                size_hint_x: .09
+                            TextInput:
+                                id: name
+                                multiline: False
+                                size_hint_x: .3
+                            TextInput:
+                                id: last_name
+                                multiline: False
+                                size_hint_x: .3
+
+                            TextInput:
+                                id: model
+                                multiline: False
+                                size_hint_x: .3
+                            TextInput:
+                                id: category
+                                multiline: False
+                                size_hint_x: .3
+
+                            Button:
+                                id:add
+                                text: 'Dodaj'
+                                color: hex('#E27814')
+                                on_release:
+                                    root.add_driver()
+                                    root.clear_inputs([name, last_name, model, category])
+                                size_hint_x: .2
+                    GridLayout:
+                        pos_hint: {'center_x':0.47, 'top': 1}
+                        size_hint_x: 1
+                        size_hint_y: None
+                        size:
+                        id:list
+                        cols: 1
+            Button:
+                background_color: hex('#FFFFFF')
+                size_hint: (None,None)
+                pos_hint:{"center_x":0.8,"y":0.13}
+                size: 110,40
+                text: 'Ok'
+                color: hex('#E27814')
+                on_release:
+                    app.root.current = "live"
+            Button:
+                background_color: hex('#FFFFFF')
+                size_hint: (None,None)
+                pos_hint: {"x":0.15,"y":0.12}
+                size: 110,40
+                text: "Cofnij"
+                color: hex('#E27814')
+                on_release:
+                    root.fade()
+                    app.root.current = "rozpocznij"
+                    root.unfade()
+######################################################
+<Bramki>:
+    name: "bramki"
+    on_enter:
+        root.generuj()
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Strona Glowna"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+	    FloatLayout:
+	        Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.28,"y":0.76}
+	            font_size: '24'
+	            text: "Konfiguracja bramek czasowych"
+	            color: hex('#000000')
+            Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.58,"y":0.76}
+	            font_size: '24'
+	            text: "Numer portu: "
+	            color: hex('#000000')
+            TextInput:
+                id: port_number
+                size_hint: (None, None)
+                pos: 865,582
+                size: 50,30
+            Button:
+                size_hint: (None, None)
+                pos: 920,582
+                text: "OK"
+                size: 50,30
+                on_press: root.assign_port()
+	    FloatLayout:
+	        id: oknobramki
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (868,424.5)
+                pos_hint:{"x":0.149,"y":0.215}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            StackLayout:      # Tabela
+                id: tabelabramki
+                orientation: 'lr-tb'
+                spacing: [1,1]
+                size_hint: (None,None)
+                size: (862,420)
+                pos_hint:{"x":0.152,"y":0.22}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            GridLayout:
+                cols: 1
+                size_hint: (None,None)
+                size: (860,420)
+                pos_hint:{"x":0.153,"y":0.175}
+                id: tag_id
+            Button:
+                text: "Odswiez"
+                background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.6,"y":0.15}
+	            size: 110,40
+                on_release: root.add_tag_id()
+            Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.7,"y":0.15}
+	            size: 110,40
+	            text: "Dalej"
+	            on_release:
+	                root.fade()
+	                app.root.current = "rozpocznij"
+	                root.unfade()
+	        Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.18,"y":0.15}
+	            size: 110,40
+	            text: "Cofnij"
+	            on_release:
+	                root.fade()
+	                app.root.current = "nowa"
+	                root.unfade()
+
+######################################################
+<Rozpocznij>:
+    name: "rozpocznij"
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+	    FloatLayout:
+	        Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.47,"y":0.76}
+	            font_size: '24'
+	            color: hex('#000000')
+	            text: "Dodawanie nazwy wyscigu"
+
+	        Label:
+	        	size_hint: (None,None)
+	            pos_hint: {"x":0.27,"y":0.51}
+	            font_size: '22'
+	            color: hex('#000000')
+	            text: root.text2
+
+	        TextInput:
+	            id: wyscig
+	            size_hint: (None,None)
+	            size: 300,50
+	            font_size: '22'
+	            pos_hint: {"x":0.4,"y":0.55}
+	            multiline: False
+	        Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.15,"y":0.12}
+	            size: 110,40
+	            text: "Cofnij"
+	            color: hex('#E27814')
+	            on_release:
+	                root.fade()
+	                app.root.current = "bramki"
+	                root.unfade()
+	        Button:
+	            id: dalej
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint:{"center_x":0.8,"y":0.13}
+	            size: 110,40
+	            text: "Dalej"
+	            color: hex('#E27814')
+	            on_release:
+                    root.fade()
+                    root.input()
+                    root.unfade()
+
+################################################################################################
+<HistoriaWyscigu>:
+    name:"historia"
+    on_pre_enter:
+        root.generuj()    # Wyświetlamy zaktualizowaną
+    on_leave:
+        oknoHistoria.clear_widgets()    # Czyścimy okno
+        tabelaHistoria.clear_widgets()    # Czyścimy tabele
+
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: root.text1
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: oknoHistoria
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaHistoria
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Button:
+                size_hint: 0.1, 0.05
+                pos_hint:{"center_x":0.5,"y":0.13}
+                text: root.text2
+                on_release:
+                    app.root.current = "poprzednie"
+######################################################
+<PolaczRFID>:
+    name: "polaczRFID"
+    on_pre_enter:
+        root.generuj()    # Wyświetlamy zaktualizowaną
+
+    on_leave:
+        tabelaRFID.clear_widgets()    # Czyścimy tabele
+
+    canvas.before:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+    canvas:
+        Color:
+            rgba: (0,0,0,.3)
+        Rectangle:
+            size:self.width, self.height
+    FloatLayout:
+        Image:
+            source: 'graphics/lapify.png'
+            color: (1,1,1,.5)
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+    StackLayout:    #przyciemniony górny pasek
+        canvas:
+            Color:
+                rgba: (1,1,1,1)
+            Rectangle:
+                source: 'graphics/pressed.png'
+                pos: 0, self.height-40
+                size: self.width, 40
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Strona Glowna"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Poprzednie Sesje"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Pomoc"
+    FloatLayout:    #czarna ramka wokół okienka
+	    canvas:
+		    Color:
+			    rgba: hex('#000000')
+		    Rectangle:
+			    pos: 173,73
+			    size: 934,554
+
+    FloatLayout:    #okienko
+	    canvas:
+		    Color:
+			    rgba: hex('#808080')
+		    Rectangle:
+			    pos: 175,75
+			    size: 930,550
+
+	    FloatLayout:
+	        FloatLayout:
+	            id: oknoHistoria
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
+                canvas:
+                    Color:
+                        rgba: hex('#606060')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.616,.54)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaRFID
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            Label:
+	        	size_hint: (None,None)
+	            pos_hint:{"x":0.45,"y":0.755}
+	            font_size: '30'
+	            text: "Parowanie RFID"
+	            color: hex('#EF8B00')
+            Button:
+	            background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.7,"y":0.12}
+	            size: 110,40
+	            text: "Wroc"
+	            on_release:
+	                app.root.current = "live"
+
