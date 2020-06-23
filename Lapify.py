@@ -37,6 +37,7 @@ Builder.load_string("""
   text: ""
   color: hex('#000000')
   bgcolor: hex('#FFFFFF')
+  font_name: 'graphics/Roboto-Light'
   canvas.before:
     Color:
       rgba: self.bgcolor
@@ -414,7 +415,7 @@ class Live(Screen):
 
         bg.add_widget(Label(text=f"Wyścig {nazwa_wyscigu}",
                             size_hint=(None, None),
-                            pos_hint={"x": 0.06, "y": 0.835},
+                            pos_hint={"right": 0.5, "y": 0.835},
                             font_size="30",
                             color=get_color_from_hex('#EF8B00')))
 
