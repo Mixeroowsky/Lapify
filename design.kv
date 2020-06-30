@@ -4,6 +4,11 @@
 #:import utils kivy.utils
 #:import Factory kivy.factory.Factory
 
+
+# Plik zawierajacy kod w jezyku kv odpowiedzialny za wiekszosc graficznych elementow aplikacji
+
+
+# Manager zarządzający oknami aplikacji
 Manager:
 	transition: NoTransition()
 	Startowa:
@@ -21,6 +26,7 @@ Manager:
     HistoriaWyscigu:
     Pomoc:
     PolaczRFID:
+    Refresh:
 
 ################################################################################################
 <OrangeLabel@Label>
@@ -58,8 +64,10 @@ Manager:
 ################################################################################################
 <NowaSesja>:
     name: "nowa"
-    on_pre_enter: tabelaOstatniaSesja.clear_widgets()    # Czyścimy tabele
-    on_enter: root.generujtabele()    # Wyświetlamy zaktualizowaną
+    on_pre_enter:
+        p_ostatnia_sesja.clear_widgets()
+        tabelaOstatniaSesja.clear_widgets()    # Czyścimy tabele
+        root.generujtabele()    # Wyświetlamy zaktualizowaną
 
     canvas:
         Color:
@@ -130,7 +138,8 @@ Manager:
 	            color: hex('#EF8B00')
 
             FloatLayout:
-                id: p_ostatnia_sesja
+                FloatLayout:
+                    id: p_ostatnia_sesja
 
                 GridLayout:      # Ciemna obwódka wokół tabeli
                     cols: 1
@@ -300,17 +309,16 @@ Manager:
             text: root.text3
             on_release:
                 app.root.current = "polaczRFID"
-	    Button:
+        Button:
             background_color: hex('#FFFFFF')
             pos_hint:{"x":0.8,"top":0.25}
             size_hint: 0.15, 0.1
-            text: "Zakoncz LIVE"
+            text: root.text4
             on_release:
+                root.zakoncz_wyscig()
+                root.fade()
                 app.root.current = "nowa"
-
-
-
-
+                root.unfade()
 
     StackLayout:
 	    canvas:
@@ -899,11 +907,12 @@ Manager:
                     size_hint_y: .1
                 Label:
 
-######################################################
 
 ######################################################
 <DodajKierowce>:
     name: "dodaj"
+    on_enter: root.generuj()
+
     canvas.before:
         Color:
 	        rgba: hex('#6F696D')
@@ -935,7 +944,6 @@ Manager:
                 source: 'graphics/pressed.png'
                 pos: 0, self.height-40
                 size: self.width, 40
-
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: root.text1
@@ -968,91 +976,90 @@ Manager:
 	    FloatLayout:
 	        Label:
 	        	size_hint: (None,None)
-	            pos_hint: {"x":0.47,"y":0.76}
+	            pos_hint: {"x":0.47,"y":0.77}
 	            font_size: '24'
 	            color: hex('#000000')
 	            text: root.text2
 
+	    FloatLayout:
+            id: oknoDodawanie
 
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint: (0.6, 0.5) #rozmiar ciemnoszarego tla
-                pos_hint:{"x":0.2,"y":0.2}
+            TextInput:
+                id: name
+                multiline: False
+                pos_hint: {"x": 0.199, "y": 0.745}
+                size: (150, 25)
+                size_hint: (None,None)
+                font_size: '10'
+
+            TextInput:
+                id: last_name
+                multiline: False
+                pos_hint: {"x": 0.317, "y": 0.745}
+                size: (150, 25)
+                size_hint: (None,None)
+                font_size: '10'
+
+            TextInput:
+                id: model
+                multiline: False
+                pos_hint: {"x": 0.435, "y": 0.745}
+                size: (150, 25)
+                size_hint: (None,None)
+                font_size: '10'
+
+            TextInput:
+                id: category
+                multiline: False
+                pos_hint: {"x": 0.553, "y": 0.745}
+                size: (150, 25)
+                size_hint: (None,None)
+                font_size: '10'
+
+            Button:
+                id: add
+                text: 'Dodaj'
+                size_hint: (None,None)
+                color: hex('#E27814')
+                pos_hint: {"x": 0.671, "y": 0.745}
+                size: (150, 25)
+                on_release:
+                    root.add_driver()
+                    root.clear_inputs([name, last_name, model, category])
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (774,394.5)
+                pos_hint:{"x":0.1984,"y":0.1965}
                 canvas:
                     Color:
                         rgba: hex('#606060')
                     Rectangle:
                         pos: self.pos
                         size: self.size
-
-                FloatLayout:
-                    BoxLayout:
-                        orientation: 'vertical'
-                        size_hint_x: .9
-                        pos_hint: {"center_x":.4,'y': 1} #pozycja labelow i inputow
-                        BoxLayout:
-                            size_hint_y: None
-                            height: 50
-
-                            Label:
-                                text: root.text3
-                                size_hint_x: .4
-
-                            Label:
-                                text: 'Nazwisko'
-                                size_hint_x: .3
-
-                            Label:
-                                text: 'Model'
-                                size_hint_x: .3
-
-                            Label:
-                                text: 'Kategoria'
-                                size_hint_x: .3
-                            Label:
-                                text: ''
-                                size_hint_x: .3
-                        BoxLayout:
-                            id: input
-                            size_hint_y: None
-                            pos_hint_x: 1
-                            height: 40
-                            Label:
-                                text: ''
-                                size_hint_x: .09
-                            TextInput:
-                                id: name
-                                multiline: False
-                                size_hint_x: .3
-                            TextInput:
-                                id: last_name
-                                multiline: False
-                                size_hint_x: .3
-
-                            TextInput:
-                                id: model
-                                multiline: False
-                                size_hint_x: .3
-                            TextInput:
-                                id: category
-                                multiline: False
-                                size_hint_x: .3
-
-                            Button:
-                                id:add
-                                text: 'Dodaj'
-                                color: hex('#E27814')
-                                on_release:
-                                    root.add_driver()
-                                    root.clear_inputs([name, last_name, model, category])
-                                size_hint_x: .2
-                    GridLayout:
-                        pos_hint: {'center_x':0.47, 'top': 1}
-                        size_hint_x: 1
-                        size_hint_y: None
-                        size:
-                        id:list
-                        cols: 1
+            ScrollView:
+                size_hint:(0.616,.542)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.2,"y":0.2}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:
+                    id: tabelaDodawanie
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (770,1000)
+                    pos_hint:{"x":0.2,"y":0.2}
+                    canvas:
+                        Color:
+                            rgba: hex('#707070')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
             Button:
                 background_color: hex('#FFFFFF')
                 size_hint: (None,None)
@@ -1061,7 +1068,10 @@ Manager:
                 text: 'Ok'
                 color: hex('#E27814')
                 on_release:
+                    root.rozpocznij()
+                    root.swap()
                     app.root.current = "live"
+                    root.unswap()
             Button:
                 background_color: hex('#FFFFFF')
                 size_hint: (None,None)
@@ -1071,13 +1081,16 @@ Manager:
                 color: hex('#E27814')
                 on_release:
                     root.fade()
-                    app.root.current = "rozpocznij"
+                    root.cofnij()
                     root.unfade()
 ######################################################
 <Bramki>:
     name: "bramki"
     on_enter:
+    on_enter:
         root.generuj()
+        root.add_tag_id()
+        tag_id.clear_widgets()
     canvas.before:
         Color:
 	        rgba: hex('#6F696D')
@@ -1111,7 +1124,7 @@ Manager:
                 size: self.width, 40
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: "Strona Glowna"
+            text: root.text1
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -1179,7 +1192,7 @@ Manager:
                 spacing: [1,1]
                 size_hint: (None,None)
                 size: (862,420)
-                pos_hint:{"x":0.152,"y":0.22}
+                pos_hint:{"x":0.151,"y":0.2185}
                 canvas:
                     Color:
                         rgba: hex('#606060')
@@ -1193,7 +1206,14 @@ Manager:
                 pos_hint:{"x":0.153,"y":0.175}
                 id: tag_id
             Button:
-                text: "Odswiez"
+                text: "Konfiguruj"
+                background_color: hex('#FFFFFF')
+	            size_hint: (None,None)
+	            pos_hint: {"x":0.5,"y":0.15}
+	            size: 110,40
+                on_release: root.konfiguracja_bramek()
+            Button:
+                text: root.text2
                 background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.6,"y":0.15}
@@ -1206,9 +1226,12 @@ Manager:
 	            size: 110,40
 	            text: "Dalej"
 	            on_release:
+	            on_release:
 	                root.fade()
 	                app.root.current = "rozpocznij"
 	                root.unfade()
+	                port_number.text = ""
+
 	        Button:
 	            background_color: hex('#FFFFFF')
 	            size_hint: (None,None)
@@ -1286,7 +1309,7 @@ Manager:
 	            pos_hint: {"x":0.47,"y":0.76}
 	            font_size: '24'
 	            color: hex('#000000')
-	            text: "Dodawanie nazwy wyscigu"
+	            text: root.text3
 
 	        Label:
 	        	size_hint: (None,None)
@@ -1479,7 +1502,7 @@ Manager:
                 size: self.width, 40
         ImageButton:
             background_normal: 'graphics/pressed.png'
-            text: "Strona Glowna"
+            text: root.text1
         ImageButton:
             background_normal: 'graphics/pressed.png'
             text: "Live"
@@ -1554,7 +1577,103 @@ Manager:
 	            size_hint: (None,None)
 	            pos_hint: {"x":0.7,"y":0.12}
 	            size: 110,40
-	            text: "Wroc"
+	            text: root.text2
 	            on_release:
 	                app.root.current = "live"
 
+######################################################
+<Refresh>:
+    name: "refresh"
+
+    canvas:
+        Color:
+	        rgba: hex('#6F696D')
+	    Rectangle:
+	        pos: self.pos
+	        size: self.size
+
+    FloatLayout:
+
+        Image:
+            source: 'graphics/lapify.png'
+            size_hint: None, None
+            pos: root.width-(self.width+200),root.height-160
+            size: 120,120
+        Image:
+            source: 'graphics/gllogo.png'
+            size_hint: None, None
+            pos: root.width-self.width+20,root.height-230
+            size:250,250
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.55}
+            size_hint: 0.15, 0.1
+            text: root.text2
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.4}
+            size_hint: 0.15, 0.1
+            text: root.text3
+        Button:
+            background_color: hex('#FFFFFF')
+            pos_hint:{"x":0.8,"top":0.25}
+            size_hint: 0.15, 0.1
+            text: root.text4
+
+    StackLayout:
+	    canvas:
+		    Color:
+			    rgba: (1,1,1,1)
+		    Rectangle:
+			    source: 'graphics/titlebar.png'
+			    pos: 0, self.height-40
+			    size: self.width, 40
+
+        ImageButton:
+            text: root.text1
+            on_release:
+                app.root.current = "nowa"
+        ImageButton:
+            background_normal: 'graphics/pressed.png'
+            text: "Live"
+        ImageButton:
+            text: "Poprzednie Sesje"
+        ImageButton:
+            text: "Pomoc"
+
+        FloatLayout:
+
+            FloatLayout:
+
+            GridLayout:      # Ciemna obwódka wokół tabeli
+                cols: 1
+                size_hint: (None,None)
+                size: (956,504.5)
+                pos_hint:{"x":0.0087,"y":0.168}
+                canvas:
+                    Color:
+                        rgba: hex('#404040')
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint:(0.759,.696)
+                do_scroll_x: False
+                do_scroll_y: True
+                pos_hint:{"x":0.01,"y":0.17}
+                bar_width: 16
+                bar_color: 5, 10, 15, .8
+                bar_inactive_color: 5, 20, 10, .5
+                scroll_type: ['bars']
+                StackLayout:      # Tabela
+                    orientation: 'lr-tb'
+                    spacing: [1,1]
+                    size_hint: (None,None)
+                    size: (952,2000)
+                    pos_hint:{"x":0.01,"y":0.17}
+                    canvas:
+                        Color:
+                            rgba: hex('#606060')
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
